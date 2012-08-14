@@ -1,5 +1,6 @@
 #import "BundleItemMenuItem.h"
 #import <OakFoundation/NSString Additions.h>
+#import <OakAppKit/NSColor Additions.h>
 #import <ns/ns.h>
 
 @interface BundleItemMenuItem ()
@@ -29,6 +30,8 @@
 		if(tabTrigger != NULL_STR)
 		{
 			equivLeft = [[[NSAttributedString alloc] initWithString:[NSString stringWithCxxString:(" "+tabTrigger+"\u21E5 ")] attributes:smallFontAttrs] autorelease];
+			leftSize = [equivLeft size];
+			drawsLeftBackground = YES;
 		}
 		else if(keyEquiv != NULL_STR)
 		{
@@ -57,6 +60,7 @@
 	if(equivLeft)
 	{
 		[title appendAttributedString:[[[NSAttributedString alloc] initWithString:@"\t"] autorelease]];
+		leftStringRange = NSMakeRange([title length], [equivLeft length]);
 		[title appendAttributedString:equivLeft];
 		
 		alignmentWidth += leftWidth + 20;
@@ -98,6 +102,18 @@
 	
 	NSMutableAttributedString* title = [[self attributedTitle] mutableCopy];
 	[title addAttribute:NSParagraphStyleAttributeName value:pStyle range:NSMakeRange(0, [title length])];
+	if(drawsLeftBackground)
+	{
+		NSRect leftRect = NSZeroRect;
+		leftRect.size = leftSize;
+		leftRect.origin.x = 22 + [[title attributedSubstringFromRange:NSMakeRange(0, leftStringRange.location)] size].width - leftSize.width;
+		
+		NSColor* color = [NSColor roundedRectPatternColorWithFillColor:[NSColor colorWithCalibratedWhite:0 alpha:0.15]
+		                  size:leftRect.size offset:leftRect.origin xRadius:4 yRadius:4];
+		
+		if(color)
+			[title addAttribute:NSBackgroundColorAttributeName value:color range:leftStringRange];
+	}
 	
 	[self setAttributedTitle:title];
 }

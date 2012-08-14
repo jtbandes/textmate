@@ -1,7 +1,32 @@
 #import "NSColor Additions.h"
 #import <OakFoundation/OakFoundation.h>
 
+void drawPattern(void *info, CGContextRef c);
+void releasePatternInfo(void *info);
+struct pattern_info_t
+{
+	pattern_info_t (NSColor* color, NSSize size, NSPoint offset, CGFloat xRadius, CGFloat yRadius) :
+		color([color retain]), size(size), offset(offset), xRadius(xRadius), yRadius(yRadius) { }
+	
+	~pattern_info_t () { [color release]; }
+	
+	NSColor* color;
+	NSSize size;
+	NSPoint offset;
+	CGFloat xRadius;
+	CGFloat yRadius;
+};
+
 @implementation NSColor (Creation)
+static BOOL hasFullCGColorSupport = NO;
+
++ (void)load
+{
+	// 10.8 provides +colorWithCGColor:
+	IMP imp = [self methodForSelector:@selector(Oak_colorWithCGColor:)];
+	hasFullCGColorSupport = !class_addMethod(object_getClass([self class]), @selector(colorWithCGColor:), imp, "@@:@");
+}
+
 + (NSColor*)colorWithString:(NSString*)aString
 {
 	if(NSIsEmptyString(aString))
@@ -17,11 +42,52 @@
 	return nil;
 }
 
-+ (NSColor*)colorWithCGColor:(CGColorRef)aColor
++ (NSColor*)Oak_colorWithCGColor:(CGColorRef)aColor
 {
 	return [NSColor colorWithColorSpace:[[[NSColorSpace alloc] initWithCGColorSpace:CGColorGetColorSpace(aColor)] autorelease] components:CGColorGetComponents(aColor) count:CGColorGetNumberOfComponents(aColor)];
 }
+
++ (NSColor*)roundedRectPatternColorWithFillColor:(NSColor*)fillColor size:(NSSize)size offset:(NSPoint)offset xRadius:(CGFloat)xRadius yRadius:(CGFloat)yRadius
+{
+	if(!hasFullCGColorSupport)
+		return nil;
+	
+	CGPatternCallbacks callbacks = { .version = 0, .drawPattern = drawPattern, .releaseInfo = releasePatternInfo };
+	CGPatternRef pattern = CGPatternCreate(new pattern_info_t(fillColor, size, offset, xRadius, yRadius),
+	                                       CGRectMake(0, 0, size.width, size.height),
+	                                       CGAffineTransformMakeTranslation(offset.x, offset.y),
+	                                       offset.x+size.width, offset.y+size.height,
+	                                       kCGPatternTilingConstantSpacing, true, &callbacks);
+	
+	CGColorRef cgColor = CGColorCreateWithPattern(CGColorSpaceCreatePattern(NULL), pattern, (CGFloat[1]){ 1.0 });
+	CGPatternRelease(pattern);
+	
+	NSColor* res = [self colorWithCGColor:cgColor];
+	CGColorRelease(cgColor);
+	
+	return res;
+}
 @end
+
+void drawPattern(void *info, CGContextRef ctx)
+{
+	pattern_info_t* patternInfo = (pattern_info_t*)info;
+	
+	NSGraphicsContext *gc = [NSGraphicsContext graphicsContextWithGraphicsPort:ctx flipped:NO];
+	[NSGraphicsContext setCurrentContext:gc];
+	[gc saveGraphicsState];
+	
+	[patternInfo->color set];
+	NSRect rect = NSMakeRect(0, 0, patternInfo->size.width, patternInfo->size.height);
+	[[NSBezierPath bezierPathWithRoundedRect:rect xRadius:patternInfo->xRadius yRadius:patternInfo->yRadius] fill];
+	
+	[gc restoreGraphicsState];
+}
+
+void releasePatternInfo(void *info)
+{
+	delete (pattern_info_t*)info;
+}
 
 @implementation NSColor (OakColor)
 - (BOOL)isDark
@@ -34,3 +100,4 @@
 	return intensity < 50*255*255;
 }
 @end
+

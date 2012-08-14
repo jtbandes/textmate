@@ -10,6 +10,9 @@ struct BundleItemMenuItemAlignment
 @interface BundleItemMenuItem : NSMenuItem
 {
 	BOOL hasRightPart;
+	BOOL drawsLeftBackground;
+	NSSize leftSize;
+	NSRange leftStringRange;
 }
 + (BundleItemMenuItem*)menuItemWithBundleItem:(bundles::item_ptr const&)bundleItem alignmentData:(BundleItemMenuItemAlignment&)alignment;
 - (void)updateAlignment:(BundleItemMenuItemAlignment&)alignment;
