@@ -1,6 +1,7 @@
 #import "OakLayoutView.h"
 #import <oak/CocoaSTL.h>
 #import <oak/debug.h>
+#include "box.h"
 
 OAK_DEBUG_VAR(OakLayoutView);
 
@@ -118,6 +119,12 @@ static box_t* add_box (box_t* newBox, box_t* container, NSRectEdge edge, box_t c
 }
 
 @implementation OakLayoutView
+{
+	box_t* box;
+	std::map<NSView*, box_t*> views;
+	std::multimap<NSView*, OakResizeInfo> resize_info;
+}
+
 - (void)repositionSubviews
 {
 	for(NSView* view in [self subviews])

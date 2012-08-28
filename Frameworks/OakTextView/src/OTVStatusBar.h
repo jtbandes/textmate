@@ -2,23 +2,6 @@
 #import <text/types.h>
 
 @interface OTVStatusBar : OakStatusBar
-{
-	text::range_t caretPosition;
-	NSString* grammarName;
-	NSString* symbolName;
-	BOOL overwriteMode;
-	BOOL isMacroRecording;
-	BOOL freehandedEditing;
-	BOOL softTabs;
-	int32_t tabSize;
-	BOOL showResizeThumb;
-
-	id delegate;
-
-	NSImage* pulsedRecordingIndicator;
-	NSTimer* recordingTimer;
-	CGFloat recordingTime;
-}
 - (void)setCaretPosition:(std::string const&)range;
 @property (nonatomic, copy)   NSString* grammarName;
 @property (nonatomic, copy)   NSString* symbolName;

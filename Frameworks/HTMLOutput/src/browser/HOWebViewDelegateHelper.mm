@@ -3,6 +3,11 @@
 #import <OakFoundation/NSString Additions.h>
 
 @implementation HOWebViewDelegateHelper
+{
+	id delegate;
+	NSString* projectUUID;
+}
+
 @synthesize delegate, projectUUID;
 
 - (void)dealloc
@@ -129,7 +134,7 @@
 }
 @end
 
-@interface HTMLTMFileDummyProtocol : NSURLProtocol { }
+@interface HTMLTMFileDummyProtocol : NSURLProtocol
 @end
 
 @implementation HTMLTMFileDummyProtocol

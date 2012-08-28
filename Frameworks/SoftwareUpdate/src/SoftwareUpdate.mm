@@ -38,6 +38,19 @@ NSString* const kSoftwareUpdateChannelNightly              = @"nightly";
 static SoftwareUpdate* SharedInstance;
 
 @implementation SoftwareUpdate
+{
+	NSDictionary* channels;
+	key_chain_t keyChain;
+
+	NSTimeInterval pollInterval;
+	NSTimer* pollTimer;
+
+	BOOL isChecking;
+	NSString* errorString;
+
+	DownloadWindowController* downloadWindowController;
+}
+
 @synthesize channels, isChecking, errorString, pollTimer, downloadWindowController;
 
 + (SoftwareUpdate*)sharedInstance

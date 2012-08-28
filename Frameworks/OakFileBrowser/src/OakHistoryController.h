@@ -1,9 +1,4 @@
 @interface OakHistoryController : NSObject
-{
-	NSMutableArray* historyArray;
-	NSMutableArray* recentLocationsArray;
-	NSInteger historyIndex;
-}
 @property (nonatomic, retain) NSDictionary* state;
 
 @property (nonatomic, readonly) NSURL* previousURL;

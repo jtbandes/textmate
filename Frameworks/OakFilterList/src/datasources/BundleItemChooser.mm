@@ -18,16 +18,17 @@
 OAK_DEBUG_VAR(FilterList_BundleItemChooser);
 
 @interface BundleItemChooserItem : NSObject
-{
-	NSUInteger index;
-	oak::uuid_t uuid;
-}
 @property (nonatomic, assign) NSUInteger index;
 - (NSString*)uuid;
 - (void)setUuid:(oak::uuid_t const&)other;
 @end
 
 @implementation BundleItemChooserItem
+{
+	NSUInteger index;
+	oak::uuid_t uuid;
+}
+
 @synthesize index;
 
 - (NSString*)uuid
@@ -53,8 +54,6 @@ OAK_DEBUG_VAR(FilterList_BundleItemChooser);
 @end
 
 @interface OakScopeBar : MGScopeBar
-{
-}
 @end
 
 @implementation OakScopeBar
@@ -76,24 +75,18 @@ OAK_DEBUG_VAR(FilterList_BundleItemChooser);
 @end
 
 @interface BundleItemChooserViewController : NSViewController <MGScopeBarDelegate>
-{
-	NSSearchField* searchField;
-	OakKeyEquivalentView* keyEquivField;
-	NSSegmentedControl* sourceSelector;
-	MGScopeBar* scopeBar;
-	BundleItemChooser* itemChooser;
-}
 @property (nonatomic, assign) BundleItemChooser* itemChooser;
 @end
 
 @interface BundleItemChooserView : NSView
-{
-	BundleItemChooserViewController* viewController;
-}
 @property (nonatomic, assign) BundleItemChooserViewController* viewController;
 @end
 
 @implementation BundleItemChooserView
+{
+	BundleItemChooserViewController* viewController;
+}
+
 @synthesize viewController;
 
 - (void)viewDidMoveToWindow
@@ -104,6 +97,14 @@ OAK_DEBUG_VAR(FilterList_BundleItemChooser);
 @end
 
 @implementation BundleItemChooserViewController
+{
+	NSSearchField* searchField;
+	OakKeyEquivalentView* keyEquivField;
+	NSSegmentedControl* sourceSelector;
+	MGScopeBar* scopeBar;
+	BundleItemChooser* itemChooser;
+}
+
 @synthesize itemChooser;
 
 static NSString* const TitleSearchMode         = @"TitleSearchMode";
@@ -299,6 +300,19 @@ static NSString* const AllScopes    = @"AllScopes";
 @end
 
 @implementation BundleItemChooser
+{
+	OBJC_WATCH_LEAKS(BundleItemChooser);
+	scope::context_t scope;
+	std::vector<bundles::item_ptr> all_items;
+	std::set<oak::uuid_t> items_filtered_by_scope;
+	BOOL searchAllScopes;
+	std::string originalFilterString;
+	std::string filterString;
+	NSViewController* viewController;
+	BOOL keyEquivalentSearch;
+	search::type searchType;
+}
+
 @synthesize keyEquivalentSearch, searchAllScopes, searchType;
 
 static std::vector<bundles::item_ptr> relevant_items_in_scope (search::type searchType, scope::context_t const& scope)

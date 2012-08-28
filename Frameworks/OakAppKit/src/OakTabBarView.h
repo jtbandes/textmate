@@ -23,28 +23,6 @@ typedef std::shared_ptr<layout_metrics_t> layout_metrics_ptr;
 @protocol OakTabBarViewDelegate, OakTabBarViewDataSource;
 
 PUBLIC @interface OakTabBarView : OakControl
-{
-	OBJC_WATCH_LEAKS(OakTabBarView);
-
-	NSMutableArray* tabTitles;         // bindable as ‘value’
-	NSMutableArray* tabToolTips;       // bindable as ‘toolTip’
-	NSMutableArray* tabModifiedStates; // bindable as ‘isEdited’
-
-	BOOL layoutNeedsUpdate;
-	NSUInteger selectedTab;            // bindable as ‘selectionIndexes’ (NSIndexSet)
-	NSUInteger hiddenTab;
-
-	BOOL isExpanded;
-
-	layout_metrics_ptr metrics;
-	std::vector<NSRect> tabRects;
-	std::map<NSUInteger, value_t> tabDropSpacing;
-	OakTimer* slideAroundAnimationTimer;
-
-	id <OakTabBarViewDelegate> delegate;
-	id <OakTabBarViewDataSource> dataSource;
-	std::vector<binding_info_t> bindings;
-}
 @property (nonatomic, assign) BOOL isExpanded;
 @property (nonatomic, assign) id <OakTabBarViewDelegate> delegate;
 @property (nonatomic, assign) id <OakTabBarViewDataSource> dataSource;

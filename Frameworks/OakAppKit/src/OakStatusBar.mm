@@ -10,6 +10,11 @@
 @end
 
 @implementation OakStatusBar
+{
+	std::vector<sb::cell_t> cells;
+	NSInteger borderEdges;
+}
+
 @synthesize borderEdges;
 
 - (id)initWithFrame:(NSRect)frame

@@ -3,13 +3,14 @@
 #import <test/cocoa.h>
 
 @interface MyEventView : NSView
-{
-	NSString* keyString;
-}
 @property (nonatomic, retain) NSString* keyString;
 @end
 
 @implementation MyEventView
+{
+	NSString* keyString;
+}
+
 @synthesize keyString;
 
 - (id)initWithFrame:(NSRect)aRect

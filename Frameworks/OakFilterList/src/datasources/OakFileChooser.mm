@@ -271,10 +271,6 @@ void file_chooser_t::wait () const
 @end
 
 @interface FileChooserItem : NSObject <NSCopying>
-{
-	file_chooser_t::item_t data;
-	NSString* selectionString;
-}
 + (FileChooserItem*)fileChooserItemWithItem:(file_chooser_t::item_t const&)someItem selection:(NSString*)aSelection;
 @property (nonatomic, readonly) NSString* path;
 @property (nonatomic, readonly) NSString* selectionString;
@@ -283,6 +279,11 @@ void file_chooser_t::wait () const
 @end
 
 @implementation FileChooserItem
+{
+	file_chooser_t::item_t data;
+	NSString* selectionString;
+}
+
 @synthesize selectionString;
 
 + (FileChooserItem*)fileChooserItemWithItem:(file_chooser_t::item_t const&)someItem selection:(NSString*)aSelection { return [[[FileChooserItem alloc] initWithItem:someItem selection:aSelection] autorelease]; }
@@ -336,6 +337,9 @@ void file_chooser_t::wait () const
 @end
 
 @interface FileChooserViewController : NSViewController <NSComboBoxDelegate, NSSplitViewDelegate>
+@end
+
+@implementation FileChooserViewController
 {
 	OBJC_WATCH_LEAKS(FileChooserViewController);
 	NSSearchField* searchField;
@@ -344,9 +348,7 @@ void file_chooser_t::wait () const
 	NSSegmentedControl* sourceSelector;
 	OakFileChooser* fileChooser;
 }
-@end
 
-@implementation FileChooserViewController
 - (void)updateTitles
 {
 	[sourceSelector setLabel:[NSString stringWithCxxString:path::display_name(fileChooser.projectPath.UTF8String)] forSegment:0];
@@ -479,6 +481,23 @@ void file_chooser_t::wait () const
 @end
 
 @implementation OakFileChooser
+{
+	OBJC_WATCH_LEAKS(OakFileChooser)
+	NSString* _path;
+	NSString* projectPath;
+
+	NSViewController* viewController;
+
+	file_chooser_t helper;
+	document::document_ptr document;
+
+	OakTimer* scannerProbeTimer;
+	double pollInterval;
+	NSUInteger sourceIndex;
+
+	NSString* title;
+}
+
 @synthesize scannerProbeTimer, path = _path, projectPath, sourceIndex, title;
 
 - (NSString*)effectivePath

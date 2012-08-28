@@ -27,6 +27,20 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 
 @implementation Find
+{
+	FFWindowController* windowController;
+
+	NSString* projectIdentifier;
+	NSString* documentIdentifier;
+
+	std::map<std::string, find::folder_scan_settings_t> folderSettings;
+
+	// OakFindProtocolServer
+	find_operation_t findOperation;
+	find::options_t  findOptions;
+	BOOL closeWindowOnSuccess;
+}
+
 @synthesize projectIdentifier, documentIdentifier, windowController;
 @synthesize findOperation, findOptions;
 

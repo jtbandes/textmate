@@ -5,14 +5,16 @@
 #import <oak/oak.h>
 
 @interface BundlePopupMenuTarget : NSObject
-{
-	NSInteger selectedIndex;
-}
 @property NSInteger selectedIndex;
 @end
 
 @implementation BundlePopupMenuTarget
+{
+	NSInteger selectedIndex;
+}
+
 @synthesize selectedIndex;
+
 - (id)init
 {
 	if((self = [super init]))

@@ -2,6 +2,10 @@
 #import "NSImage Additions.h"
 
 @implementation OakImageAndTextCell
+{
+	NSImage* image;
+}
+
 @synthesize image;
 
 - (void)dealloc

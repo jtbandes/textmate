@@ -103,15 +103,16 @@ static NSArray* ImageStackForPath (NSString* path)
 // ===============================
 
 @interface OakFileIconImageRep : NSImageRep
+- (id)initWithPath:(NSString*)aPath isModified:(BOOL)flag;
+@end
+
+@implementation OakFileIconImageRep
 {
 	NSString* path;
 	BOOL isModified;
 	NSArray* imageStack;
 }
-- (id)initWithPath:(NSString*)aPath isModified:(BOOL)flag;
-@end
 
-@implementation OakFileIconImageRep
 - (id)initWithPath:(NSString*)aPath isModified:(BOOL)flag
 {
 	if((self = [super init]))

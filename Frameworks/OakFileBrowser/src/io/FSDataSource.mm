@@ -33,6 +33,10 @@ FSDataSource* DataSourceForURL (NSURL* anURL, NSUInteger someOptions)
 }
 
 @implementation FSDataSource
+{
+	FSItem* rootItem;
+}
+
 @synthesize rootItem;
 
 + (NSArray*)sortArray:(NSArray*)anArray usingOptions:(NSUInteger)someOptions

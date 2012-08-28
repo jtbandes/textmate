@@ -6,6 +6,11 @@ NSUInteger const OakViewWindowIsKeyMask          = 1 << 2;
 NSUInteger const OakViewViewIsFirstResponderMask = 1 << 3;
 
 @implementation OakView
+{
+	BOOL isFirstResponder;
+	NSUInteger keyState;
+}
+
 @synthesize keyState;
 
 - (id)initWithFrame:(NSRect)aFrame

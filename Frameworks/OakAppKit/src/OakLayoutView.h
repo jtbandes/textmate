@@ -1,5 +1,3 @@
-#include "box.h"
-
 struct OakResizeInfo
 {
 	int width, height;
@@ -8,11 +6,6 @@ struct OakResizeInfo
 };
 
 @interface OakLayoutView : NSView
-{
-	box_t* box;
-	std::map<NSView*, box_t*> views;
-	std::multimap<NSView*, OakResizeInfo> resize_info;
-}
 - (void)addView:(NSView*)aView;
 - (void)addView:(NSView*)aView atEdge:(NSRectEdge)anEdge ofView:(NSView*)otherView;
 - (void)removeView:(NSView*)aView;

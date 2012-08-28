@@ -1,7 +1,5 @@
 #import "OakControl.h"
 
-@class OakStatusBar;
-
 const CGFloat OakStatusBarHeight = 16;
 
 namespace sb
@@ -129,10 +127,6 @@ namespace sb
 }
 
 PUBLIC @interface OakStatusBar : OakControl
-{
-	std::vector<sb::cell_t> cells;
-	NSInteger borderEdges;
-}
 @property (nonatomic, readonly) CGFloat minimumWidth;
 @property (nonatomic, assign) NSInteger borderEdges;
 - (void)setCells:(std::vector<sb::cell_t> const&)newCells;

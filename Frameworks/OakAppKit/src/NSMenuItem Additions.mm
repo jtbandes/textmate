@@ -6,15 +6,15 @@
 #import <text/utf8.h>
 
 @interface MenuMutableAttributedString : NSMutableAttributedString
-{
-	NSMutableAttributedString* contents;
-	CGSize size;
-}
 - (void)appendTableCellWithString:(NSString*)string table:(NSTextTable*)table textAlignment:(NSTextAlignment)textAlignment verticalAlignment:(NSTextBlockVerticalAlignment)verticalAlignment font:(NSFont*)font row:(int)row column:(int)column;
 - (CGSize)size;
 @end
 
 @implementation MenuMutableAttributedString
+{
+	NSMutableAttributedString* contents;
+	CGSize size;
+}
 
 // Methods to override in subclass
 

@@ -14,6 +14,15 @@ NSUInteger const OakChoiceMenuKeyMovement = 4;
 enum action_t { kActionNop, kActionTab, kActionReturn, kActionCancel, kActionMoveUp, kActionMoveDown, kActionPageUp, kActionPageDown, kActionMoveToBeginning, kActionMoveToEnd };
 
 @implementation OakChoiceMenu
+{
+	NSWindow* window;
+	NSTableView* tableView;
+	NSArray* choices;
+	NSUInteger choiceIndex;
+	NSUInteger keyAction;
+	NSPoint topLeftPosition;
+}
+
 @synthesize choices, choiceIndex, window;
 
 - (id)init

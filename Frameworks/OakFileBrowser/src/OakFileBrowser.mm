@@ -97,6 +97,18 @@ static NSURL* ParentForURL (NSURL* url)
 }
 
 @implementation OakFileBrowser
+{
+	OBJC_WATCH_LEAKS(OakFileBrowser);
+
+	NSURL* url; // Currently viewed root url
+	NSUInteger dataSourceOptions;
+	OakHistoryController* historyController;
+
+	id <OakFileBrowserDelegate> delegate;
+	OakFileBrowserView* view;
+	FSOutlineViewDelegate* outlineViewDelegate;
+}
+
 @synthesize url, historyController, delegate, view;
 
 - (BOOL)acceptsFirstResponder { return NO; }

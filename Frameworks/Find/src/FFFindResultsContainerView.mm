@@ -1,11 +1,12 @@
 @interface FFFindResultsContainerView : NSView
+@end
+
+@implementation FFFindResultsContainerView
 {
 	NSView* header;
 	NSView* list;
 }
-@end
 
-@implementation FFFindResultsContainerView
 - (void)setFrame:(NSRect)frame
 {
 	[super setFrame:frame];

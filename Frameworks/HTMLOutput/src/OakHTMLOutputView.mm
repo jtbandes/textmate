@@ -11,6 +11,12 @@ extern NSString* const kCommandRunnerURLScheme; // from HTMLOutput.h
 @end
 
 @implementation OakHTMLOutputView
+{
+	HOAutoScroll* autoScrollHelper;
+	std::map<std::string, std::string> environment;
+	BOOL runningCommand;
+}
+
 @synthesize runningCommand;
 
 - (id)initWithFrame:(NSRect)frame

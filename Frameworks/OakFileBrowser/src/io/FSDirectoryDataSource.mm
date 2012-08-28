@@ -25,13 +25,14 @@ OAK_DEBUG_VAR(FileBrowser_DSDirectory);
 // TODO ask SCM about missing items
 
 @interface FSFileItem : FSItem
-{
-	std::pair<dev_t, ino_t> key;
-}
 @property (nonatomic, assign) std::pair<dev_t, ino_t> const& key;
 @end
 
 @implementation FSFileItem
+{
+	std::pair<dev_t, ino_t> key;
+}
+
 @synthesize key;
 @end
 
@@ -283,6 +284,17 @@ static void remove_callbacks (scm::callback_t* cb, std::string const& path, std:
 }
 
 @implementation FSDirectoryDataSource
+{
+	NSUInteger dataSourceOptions;
+
+	fs::event_callback_t* callback;
+	std::map< std::string, objc_ptr<FSItem*> > visible;
+
+	scm::callback_t* scmCallback;
+	std::map<std::string, scm::info_ptr> scmDrivers;
+	std::map<std::string, size_t> scmReferenceCounts;
+}
+
 - (void)fsEvent:(std::string const&)aPath
 {
 	D(DBF_FileBrowser_DSDirectory, bug("%s\n", aPath.c_str()););

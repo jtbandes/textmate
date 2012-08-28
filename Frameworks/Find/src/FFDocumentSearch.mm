@@ -58,6 +58,15 @@ private:
 };
 
 @implementation FFMatch
+{
+	OBJC_WATCH_LEAKS(FFMatch);
+
+	std::string matchText;
+	find::match_t match;
+	document::document_t::callback_t* callback;
+	NSImage* icon;
+}
+
 @synthesize icon;
 
 - (id)initWithMatch:(find::match_t const&)aMatch;
@@ -136,6 +145,29 @@ private:
 OAK_DEBUG_VAR(Find_FolderSearch);
 
 @implementation FFDocumentSearch
+{
+	OBJC_WATCH_LEAKS(FFDocumentSearch);
+
+	std::string searchString;
+	find::options_t options;
+	find::folder_scan_settings_t folderOptions;
+	NSString* projectIdentifier;
+	NSString* documentIdentifier;
+
+	NSMutableArray* matchingDocuments; // FFMatches in order of searching, containing document
+	NSMutableDictionary* matchInfo;    // Document identifier → array of FFMatch instances
+	NSMutableSet* replacementMatchesToSkip;
+
+	BOOL hasPerformedReplacement;
+	BOOL hasPerformedSave;
+
+	scan_path_ptr scanner;
+	OakTimer* scannerProbeTimer;
+	oak::duration_t timer;
+
+	NSString* currentPath;
+}
+
 // ==============
 // = Public API =
 // ==============

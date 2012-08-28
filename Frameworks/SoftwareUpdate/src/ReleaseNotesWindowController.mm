@@ -15,6 +15,13 @@ static NSData* Digest (NSString* someString)
 @end
 
 @implementation ReleaseNotesWindowController
+{
+	OBJC_WATCH_LEAKS(ReleaseNotesWindowController);
+
+	IBOutlet WebView* webView;
+	NSURL* releaseNotesURL;
+}
+
 @synthesize releaseNotesURL;
 
 - (id)initWithURL:(NSURL*)aURL

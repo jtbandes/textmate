@@ -2,13 +2,14 @@
 #import <Quartz/Quartz.h>
 
 @interface OakPreviewItemHelper : NSObject//<QLPreviewItem>
-{
-	NSURL* previewItemURL;
-}
 @property (nonatomic, retain) NSURL* previewItemURL;
 @end
 
 @implementation OakPreviewItemHelper
+{
+	NSURL* previewItemURL;
+}
+
 @synthesize previewItemURL;
 
 - (id)initWithURL:(NSURL*)aURL
@@ -26,13 +27,14 @@
 @end
 
 @interface OakPreviewDelegateHelper : NSObject <QLPreviewPanelDelegate, QLPreviewPanelDataSource>
-{
-	NSArray* items;
-}
 @property (nonatomic, retain) NSArray* items;
 @end
 
 @implementation OakPreviewDelegateHelper
+{
+	NSArray* items;
+}
+
 @synthesize items;
 
 - (id)initWithItems:(NSArray*)someItems

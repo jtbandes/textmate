@@ -6,11 +6,6 @@
 #import <ns/ns.h>
 
 @interface OakEncodingSaveOptionsViewController : NSViewController
-{
-	IBOutlet OakEncodingPopUpButton* encodingPopUpButton;
-
-	encoding::type encodingOptions;
-}
 @property (nonatomic, retain) NSString* lineEndings;
 @property (nonatomic, retain) NSString* encoding;
 @property (nonatomic, assign) BOOL useByteOrderMark;
@@ -19,6 +14,12 @@
 @end
 
 @implementation OakEncodingSaveOptionsViewController
+{
+	IBOutlet OakEncodingPopUpButton* encodingPopUpButton;
+
+	encoding::type encodingOptions;
+}
+
 @synthesize encodingOptions;
 
 + (NSSet*)keyPathsForValuesAffectingCanUseByteOrderMark { return [NSSet setWithObject:@"encoding"]; }
@@ -62,6 +63,10 @@
 @end
 
 @implementation OakSavePanel
+{
+	OakEncodingSaveOptionsViewController* optionsViewController;
+}
+
 - (id)initWithPath:(NSString*)aPathSuggestion directory:(NSString*)aDirectorySuggestion fowWindow:(NSWindow*)aWindow delegate:(id)aDelegate encoding:(encoding::type const&)encoding
 {
 	if((self = [super init]))

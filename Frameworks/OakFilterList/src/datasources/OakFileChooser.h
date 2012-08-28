@@ -56,22 +56,6 @@ private:
 };
 
 PUBLIC @interface OakFileChooser : NSObject <FilterListDataSource>
-{
-	OBJC_WATCH_LEAKS(OakFileChooser)
-	NSString* _path;
-	NSString* projectPath;
-
-	NSViewController* viewController;
-
-	file_chooser_t helper;
-	document::document_ptr document;
-
-	OakTimer* scannerProbeTimer;
-	double pollInterval;
-	NSUInteger sourceIndex;
-
-	NSString* title;
-}
 + (id)fileChooserWithPath:(NSString*)aPath projectPath:(NSString*)project;
 @property (nonatomic, assign)   NSUInteger sourceIndex;
 @property (nonatomic, retain)   NSString*  path;

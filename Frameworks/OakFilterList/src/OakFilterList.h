@@ -3,16 +3,6 @@
 @class OakFilterListView;
 
 PUBLIC @interface OakFilterWindowController : NSWindowController
-{
-	OBJC_WATCH_LEAKS(OakFilterWindowController);
-	IBOutlet OakFilterListView* filterView;
-	IBOutlet NSView* filterControlsView;
-	SEL action;
-	SEL accessoryAction;
-	id target;
-	BOOL sendActionOnSingleClick;
-	BOOL retainedSelf;
-}
 + (id)filterWindow;
 @property (nonatomic, retain) id dataSource;
 @property (nonatomic, retain) id target;

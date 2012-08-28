@@ -9,6 +9,13 @@
 @end
 
 @implementation PreferencesPane
+{
+	NSString* label;
+	NSImage* image;
+	NSDictionary* defaultsProperties; // property → defaults key
+	NSDictionary* tmProperties; // property → tmProperties key
+}
+
 @synthesize toolbarItemLabel = label, toolbarItemImage = image, defaultsProperties, tmProperties;
 
 - (NSString*)identifier { return label; }

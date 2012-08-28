@@ -22,12 +22,13 @@
 #import <text/tokenize.h>
 
 @interface OakShowCommandErrorDelegate : NSObject
-{
-	oak::uuid_t commandUUID;
-}
 @end
 
 @implementation OakShowCommandErrorDelegate
+{
+	oak::uuid_t commandUUID;
+}
+
 - (id)initWithCommandUUID:(oak::uuid_t const&)anUUID
 {
 	if(self = [super init])

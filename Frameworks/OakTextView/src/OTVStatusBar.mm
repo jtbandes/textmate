@@ -10,6 +10,24 @@
 const NSInteger BundleItemSelector = 1;
 
 @implementation OTVStatusBar
+{
+	text::range_t caretPosition;
+	NSString* grammarName;
+	NSString* symbolName;
+	BOOL overwriteMode;
+	BOOL isMacroRecording;
+	BOOL freehandedEditing;
+	BOOL softTabs;
+	int32_t tabSize;
+	BOOL showResizeThumb;
+
+	id delegate;
+
+	NSImage* pulsedRecordingIndicator;
+	NSTimer* recordingTimer;
+	CGFloat recordingTime;
+}
+
 @synthesize recordingTimer, pulsedRecordingIndicator, grammarName, symbolName, overwriteMode, isMacroRecording, freehandedEditing, tabSize, softTabs, showResizeThumb;
 @synthesize delegate;
 

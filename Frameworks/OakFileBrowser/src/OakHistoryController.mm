@@ -3,6 +3,12 @@
 #import <oak/debug.h>
 
 @implementation OakHistoryController
+{
+	NSMutableArray* historyArray;
+	NSMutableArray* recentLocationsArray;
+	NSInteger historyIndex;
+}
+
 @synthesize historyIndex;
 
 - (id)init

@@ -4,9 +4,6 @@
 @protocol DocumentOpenHelperDelegate;
 
 @interface DocumentOpenHelper : NSObject <FileTypeDialogDelegate>
-{
-	id <DocumentOpenHelperDelegate> delegate;
-}
 @property (nonatomic, assign) id <DocumentOpenHelperDelegate> delegate;
 - (void)tryOpenDocument:(document::document_ptr const&)aDocument forWindow:(NSWindow*)aWindow delegate:(id <DocumentOpenHelperDelegate>)aDelegate;
 @end

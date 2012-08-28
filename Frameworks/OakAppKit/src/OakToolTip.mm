@@ -19,6 +19,18 @@ void OakShowToolTip (NSString* msg, NSPoint location)
 @end
 
 @implementation OakToolTip
+{
+	OBJC_WATCH_LEAKS(OakToolTip);
+
+	NSTextField* field;
+	NSTimer* animationTimer;
+	NSDate* animationStart;
+
+	NSDate* didOpenAtDate; // ignore mouse moves for the next second
+	NSPoint mousePositionWhenOpened;
+	BOOL enforceMouseThreshold;
+}
+
 + (void)initialize
 {
 	[[NSUserDefaults standardUserDefaults] registerDefaults:

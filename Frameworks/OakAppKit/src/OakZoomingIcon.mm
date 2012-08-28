@@ -1,6 +1,15 @@
 #import "OakZoomingIcon.h"
 
 @implementation OakZoomingIcon
+{
+	OBJC_WATCH_LEAKS(OakZoomingIcon);
+@private
+	NSRect startFrame;
+	NSDate* startTime;
+	NSTimeInterval duration;
+	NSTimer* animationTimer;
+}
+
 - (id)initWithIcon:(NSImage*)icon rect:(NSRect)aRect
 {
 	if(self = [super initWithContentRect:aRect styleMask:NSBorderlessWindowMask backing:NSBackingStoreBuffered defer:NO])

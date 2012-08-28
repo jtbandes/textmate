@@ -12,30 +12,6 @@
 #import <command/runner.h>
 
 @interface HOJSShellCommand : NSObject
-{
-	OBJC_WATCH_LEAKS(HOJSShellCommand);
-
-	std::string command;
-	std::map<std::string, std::string> environment;
-
-	std::vector<char> outputData, errorData;
-	int status;
-
-	id outputHandler, errorHandler, exitHandler;
-
-	oak::process_t* process;
-	bool didCloseInput;
-	io::reader_t* outputReader;
-	io::reader_t* errorReader;
-
-	cf::run_loop_t runLoop;
-	size_t completeCounter;
-
-	// unused dummy keys to get them exposed to javascript
-	NSString* outputString;
-	NSString* errorString;
-	id onreadoutput, onreaderror;
-}
 + (HOJSShellCommand*)runShellCommand:(NSString*)aCommand withEnvironment:(const std::map<std::string, std::string>&)someEnvironment andExitHandler:(id)aHandler;
 @end
 
@@ -57,6 +33,13 @@
 OAK_DEBUG_VAR(HTMLOutput_JSBridge);
 
 @implementation HOJSBridge
+{
+	id <HOJSBridgeDelegate> delegate;
+	std::map<std::string, std::string> environment;
+	BOOL isBusy; // dummy key
+	float progress; // dummy key
+}
+
 - (std::map<std::string, std::string> const&)environment;
 {
 	return environment;
@@ -181,6 +164,31 @@ OAK_DEBUG_VAR(HTMLOutput_JSShellCommand);
 @end
 
 @implementation HOJSShellCommand
+{
+	OBJC_WATCH_LEAKS(HOJSShellCommand);
+
+	std::string command;
+	std::map<std::string, std::string> environment;
+
+	std::vector<char> outputData, errorData;
+	int status;
+
+	id outputHandler, errorHandler, exitHandler;
+
+	oak::process_t* process;
+	bool didCloseInput;
+	io::reader_t* outputReader;
+	io::reader_t* errorReader;
+
+	cf::run_loop_t runLoop;
+	size_t completeCounter;
+
+	// unused dummy keys to get them exposed to javascript
+	NSString* outputString;
+	NSString* errorString;
+	id onreadoutput, onreaderror;
+}
+
 @synthesize outputHandler, errorHandler, exitHandler;
 
 - (id)initWithCommand:(NSString*)aCommand andEnvironment:(const std::map<std::string, std::string>&)someEnvironment

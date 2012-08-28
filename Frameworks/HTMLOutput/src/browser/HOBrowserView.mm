@@ -3,6 +3,11 @@
 #import "HOStatusBar.h"
 
 @implementation HOBrowserView
+{
+	OBJC_WATCH_LEAKS(HOBrowserView);
+	HOWebViewDelegateHelper* webViewDelegateHelper;
+}
+
 @synthesize webView;
 
 - (id)initWithFrame:(NSRect)frame

@@ -9,12 +9,6 @@
 @class SymbolChooserViewController;
 
 PUBLIC @interface SymbolChooser : NSObject <FilterListDataSource>
-{
-	OBJC_WATCH_LEAKS(SymbolChooser);
-	document::document_ptr document;
-	std::string filterString;
-	SymbolChooserViewController* viewController;
-}
 + (id)symbolChooserForDocument:(document::document_ptr)aDocument;
 @property (nonatomic, readonly) NSString* filterString;
 @end

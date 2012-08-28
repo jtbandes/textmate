@@ -7,6 +7,12 @@
 OAK_DEBUG_VAR(BundleMenu);
 
 @implementation BundleMenuDelegate
+{
+	OBJC_WATCH_LEAKS(BundleMenuDelegate);
+	bundles::item_ptr umbrellaItem;
+	NSMutableArray* subdelegates;
+}
+
 - (id)initWithBundleItem:(bundles::item_ptr const&)aBundleItem
 {
 	if(self = [super init])

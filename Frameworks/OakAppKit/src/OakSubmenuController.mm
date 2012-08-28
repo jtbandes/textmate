@@ -14,6 +14,14 @@ static OakSubmenuController* SharedInstance = nil;
 @end
 
 @implementation OakSubmenuController
+{
+	IBOutlet NSMenu* goToMenu;
+	IBOutlet NSMenu* marksMenu;
+
+	NSInteger tag;
+	id representedObject;
+}
+
 @synthesize representedObject;
 
 + (OakSubmenuController*)sharedInstance

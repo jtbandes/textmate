@@ -16,6 +16,15 @@
 @end
 
 @implementation SoftwareUpdatePreferences
+{
+	NSString* lastCheck;
+	NSTimer* updateLastCheckTimer;
+
+	BOOL isChecking;
+	NSDate* lastPoll;
+	NSString* errorString;
+}
+
 @synthesize isChecking, lastPoll, errorString;
 
 + (NSSet*)keyPathsForValuesAffectingLastCheck { return [NSSet setWithObjects:@"isChecking", @"lastPoll", @"errorString", nil]; }

@@ -122,12 +122,13 @@ OAK_DEBUG_VAR(DocumentController);
 @end
 
 @interface OakUnhideHelper : NSObject
-{
-	DocumentController* controller;
-}
 @end
 
 @implementation OakUnhideHelper
+{
+	DocumentController* controller;
+}
+
 - (id)initWithController:(DocumentController*)aController
 {
 	if(self = [super init])

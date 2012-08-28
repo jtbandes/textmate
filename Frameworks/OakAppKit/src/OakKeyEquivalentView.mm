@@ -18,6 +18,19 @@ static NSString* const kRecordingPlaceholderString = @"…";
 @end
 
 @implementation OakKeyEquivalentView
+{
+	NSString* eventString;
+	NSString* displayString;
+	NSMutableArray* observers;
+	NSRect clearButtonRect;
+	void* hotkeyToken;
+	BOOL disableGlobalHotkeys;
+	BOOL showClearButton;
+	BOOL mouseInClearButton;
+	BOOL recording;
+	BOOL mouseDown;
+}
+
 @synthesize eventString, disableGlobalHotkeys, displayString, showClearButton, mouseInClearButton, recording;
 
 - (id)initWithFrame:(NSRect)aRect

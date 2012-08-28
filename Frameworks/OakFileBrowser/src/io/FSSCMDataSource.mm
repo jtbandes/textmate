@@ -63,6 +63,13 @@ _Iter prune_path_children (_Iter it, _Iter last)
 }
 
 @implementation FSSCMDataSource
+{
+	NSUInteger options;
+
+	scm::info_ptr scmInfo;
+	scm::callback_t* scmCallback;
+}
+
 + (NSURL*)scmURLWithPath:(NSString*)aPath
 {
 	if(scm::info_ptr info = scm::info(path::join([aPath fileSystemRepresentation], ".scm-kludge")))

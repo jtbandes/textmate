@@ -43,6 +43,12 @@ static id RetrieveObjectAtKeyPath (std::string const& keyPath)
 }
 
 @implementation OakHistoryList
+{
+	NSMutableArray* list;
+	NSUInteger stackSize;
+	NSString* name;
+}
+
 @synthesize stackSize;
 
 + (void)load

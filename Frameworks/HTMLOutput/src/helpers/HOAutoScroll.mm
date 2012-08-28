@@ -4,6 +4,11 @@
 OAK_DEBUG_VAR(HTMLOutput_AutoScroll);
 
 @implementation HOAutoScroll
+{
+	WebFrameView* webFrame;
+	NSRect lastFrame, lastVisibleRect;
+}
+
 @synthesize webFrame;
 
 - (void)scrollViewToBottom:(NSView*)aView

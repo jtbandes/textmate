@@ -5,13 +5,14 @@
 // ===============================
 
 @interface OakCustomImageRep : NSImageRep
-{
-	OakImage* image;
-}
 - (id)initWithImage:(OakImage*)anImage;
 @end
 
 @implementation OakCustomImageRep
+{
+	OakImage* image;
+}
+
 - (id)initWithImage:(OakImage*)anImage
 {
 	if((self = [super init]))
@@ -53,6 +54,12 @@
 // ============
 
 @implementation OakImage
+{
+	NSImage* base;
+	NSImage* badge;
+	CGRectEdge edge;
+}
+
 @synthesize base, badge, edge;
 
 + (OakImage*)imageWithBase:(NSImage*)imageBase

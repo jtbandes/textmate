@@ -65,6 +65,7 @@ PUBLIC @interface DocumentController : NSWindowController <OakFileBrowserDelegat
 
 	oak::uuid_t scratchDocument;
 }
+
 @property (nonatomic, readonly) NSString* identifier;
 @property (nonatomic, assign) BOOL fileBrowserHidden;
 @property (nonatomic, readonly) NSString* documentPath;

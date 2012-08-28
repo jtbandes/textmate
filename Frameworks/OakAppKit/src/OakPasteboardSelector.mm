@@ -17,15 +17,16 @@ static size_t line_count (std::string text)
 }
 
 @interface OakPasteboardSelectorMultiLineCell : NSCell
-{
-	size_t maxLines;
-}
 @property (nonatomic, assign) size_t maxLines;
 + (id)cellWithMaxLines:(size_t)maxLines;
 - (CGFloat)rowHeightForText:(NSString*)text;
 @end
 
 @implementation OakPasteboardSelectorMultiLineCell
+{
+	size_t maxLines;
+}
+
 @synthesize maxLines;
 
 + (id)cellWithMaxLines:(size_t)maxLines;
@@ -96,16 +97,17 @@ static size_t line_count (std::string text)
 @end
 
 @interface OakPasteboardSelectorTableViewHelper : NSResponder <NSTableViewDataSource, NSTableViewDelegate>
+- (void)setTableView:(NSTableView*)aTableView;
+@end
+
+@implementation OakPasteboardSelectorTableViewHelper
 {
 	NSTableView* tableView;
 	NSMutableArray* entries;
 	BOOL shouldClose;
 	BOOL shouldSendAction;
 }
-- (void)setTableView:(NSTableView*)aTableView;
-@end
 
-@implementation OakPasteboardSelectorTableViewHelper
 - (id)initWithEntries:(NSArray*)someEntries
 {
 	if(self = [super init])
@@ -263,6 +265,12 @@ static size_t line_count (std::string text)
 static OakPasteboardSelector* SharedInstance;
 
 @implementation OakPasteboardSelector
+{
+@private
+	IBOutlet NSTableView* tableView;
+	OakPasteboardSelectorTableViewHelper* tableViewHelper;
+}
+
 + (OakPasteboardSelector*)sharedInstance
 {
 	return SharedInstance ?: [[OakPasteboardSelector new] autorelease];

@@ -115,6 +115,26 @@ static be::entry_ptr parent_for_column (NSBrowser* aBrowser, NSInteger aColumn, 
 }
 
 @implementation BundleEditor
+{
+	IBOutlet NSBrowser* browser;
+	IBOutlet OakDocumentView* documentView;
+	NSDrawer* drawer;
+
+	PropertiesViewController* sharedPropertiesViewController;
+	PropertiesViewController* extraPropertiesViewController;
+
+	be::entry_ptr bundles;
+	std::map<bundles::item_ptr, plist::dictionary_t> changes;
+
+	BOOL propertiesChanged;
+
+	bundles::item_ptr bundleItem;
+	document::document_ptr bundleItemContent;
+	NSMutableDictionary* bundleItemProperties;
+
+	document::document_t::callback_t* documentCallback;
+}
+
 @synthesize sharedPropertiesViewController, extraPropertiesViewController, bundleItemProperties;
 
 + (BundleEditor*)sharedInstance

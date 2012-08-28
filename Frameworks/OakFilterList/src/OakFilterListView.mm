@@ -24,6 +24,15 @@ NSString* const FLDataSourceItemsShouldAscendNotification  = @"FLDataSourceItems
 @end
 
 @implementation OakFilterListView
+{
+	OBJC_WATCH_LEAKS(OakFilterListView)
+	NSArray* items;
+	NSAttributedString* infoString;
+	id <FilterListDataSource> filterDataSource;
+	BOOL isWaitingForItems;
+	NSUInteger sourceIndex;
+}
+
 @synthesize filterDataSource, isWaitingForItems, items, infoString, sourceIndex;
 
 // ==================

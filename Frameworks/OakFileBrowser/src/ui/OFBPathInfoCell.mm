@@ -10,6 +10,17 @@
 @end
 
 @implementation OFBPathInfoCell
+{
+	OBJC_WATCH_LEAKS(OFBPathInfoCell);
+	NSUInteger labelIndex;
+	BOOL mouseDownInCloseButton;
+	BOOL isOpen;
+	BOOL isVisible;
+	BOOL isLoading;
+	double spinnerValue;
+	OakTimer* spinTimer;
+}
+
 @synthesize isOpen, isVisible, labelIndex, isLoading, spinTimer, mouseDownInCloseButton;
 
 - (void)drawLabelIndex:(NSUInteger)labelColorIndex inFrame:(NSRect)cellFrame

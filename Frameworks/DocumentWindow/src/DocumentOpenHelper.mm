@@ -73,6 +73,10 @@ namespace
 }
 
 @implementation DocumentOpenHelper
+{
+	id <DocumentOpenHelperDelegate> delegate;
+}
+
 @synthesize delegate;
 
 - (id)init

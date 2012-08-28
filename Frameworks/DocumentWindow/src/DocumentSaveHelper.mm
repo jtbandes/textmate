@@ -25,6 +25,15 @@ NSString* DefaultSaveNameForDocument (document::document_ptr const& aDocument)
 }
 
 @interface DocumentSaveHelper ()
+{
+	std::vector<document::document_ptr> documents;
+	NSWindow* window;
+	NSString* saveFolder;
+	document_save_callback_t* callback;
+	file::save_context_ptr context;
+	BOOL userAbort;
+}
+
 - (void)trySaveDocuments:(std::vector<document::document_ptr> const&)someDocuments forWindow:(NSWindow*)aWindow defaultDirectory:(NSString*)aFolder andCallback:(document_save_callback_t*)aCallback;
 - (void)didSaveDocument:(document::document_ptr const&)aDocument success:(BOOL)flag error:(std::string const&)aMessage usingFilter:(oak::uuid_t const&)aFilter;
 - (file::save_context_ptr const&)context;

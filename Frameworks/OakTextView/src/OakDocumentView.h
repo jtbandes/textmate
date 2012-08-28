@@ -6,24 +6,6 @@
 @class OTVStatusBar;
 
 PUBLIC @interface OakDocumentView : NSView <GutterViewDelegate, GutterViewColumnDataSource, GutterViewColumnDelegate>
-{
-	OBJC_WATCH_LEAKS(OakDocumentView);
-
-	NSScrollView* gutterScrollView;
-	GutterView* gutterView;
-	NSColor* gutterDividerColor;
-
-	NSScrollView* textScrollView;
-	OakTextView* textView;
-	OTVStatusBar* statusBar;
-	document::document_ptr document;
-	document::document_t::callback_t* callback;
-
-	NSMutableArray* topAuxiliaryViews;
-	NSMutableArray* bottomAuxiliaryViews;
-
-	IBOutlet NSPanel* tabSizeSelectorPanel;
-}
 @property (nonatomic, readonly) OakTextView* textView;
 @property (nonatomic, assign) document::document_ptr const& document;
 @property (nonatomic, assign) BOOL showResizeThumb;

@@ -33,14 +33,15 @@ static TMPlugInController* SharedInstance;
 @end
 
 @interface TMPlugIn : NSObject
-{
-	NSBundle* plugInBundle;
-	id instance;
-}
 + (TMPlugIn*)plugInWithPath:(NSString*)aPath;
 @end
 
 @implementation TMPlugIn
+{
+	NSBundle* plugInBundle;
+	id instance;
+}
+
 - (TMPlugIn*)initWithPath:(NSString*)aPath
 {
 	D(DBF_PlugInController, bug("%s\n", [aPath UTF8String]););
@@ -104,6 +105,12 @@ static TMPlugInController* SharedInstance;
 @end
 
 @implementation TMPlugInController
+{
+	NSMutableArray* loadedPlugIns;
+	NSMutableSet* plugInBundleIdentifiers;
+	BOOL didLoadAllPlugIns;
+}
+
 + (TMPlugInController*)sharedInstance
 {
 	return SharedInstance ?: [[TMPlugInController new] autorelease];

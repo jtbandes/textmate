@@ -13,13 +13,14 @@
 // ===================
 
 @interface FavoritesViewController : NSViewController
+@end
+
+@implementation FavoritesViewController
 {
 	NSSearchField* searchField;
 	FavoritesDataSource* favoritesDataSource;
 }
-@end
 
-@implementation FavoritesViewController
 - (id)initWithFavoritesDataSource:(FavoritesDataSource*)aDataSource
 {
 	if(self = [super init])
@@ -57,6 +58,14 @@
 // ===============
 
 @implementation FavoritesDataSource
+{
+	OBJC_WATCH_LEAKS(FavoritesDataSource);
+	std::string favoritesPath;
+	std::multimap<std::string, std::string, text::less_t> favorites;
+	std::string filterString;
+	FavoritesViewController* viewController;
+}
+
 - (NSViewController*)viewController
 {
 	if(!viewController)

@@ -68,13 +68,6 @@ static NSMutableArray* folders_at_path (NSString* folder)
 }
 
 @interface FFFolderMenuItemData : NSObject
-{
-	OBJC_WATCH_LEAKS(FFFolderMenuItemData);
-
-	NSString* folder;
-	NSMutableSet* visitedFolders;
-	id owner;
-}
 @property (nonatomic, retain) NSString* folder;
 @property (nonatomic, retain) NSMutableSet* visitedFolders;
 @property (nonatomic, retain) id owner;
@@ -84,6 +77,14 @@ static NSMutableArray* folders_at_path (NSString* folder)
 @end
 
 @implementation FFFolderMenuItemData
+{
+	OBJC_WATCH_LEAKS(FFFolderMenuItemData);
+
+	NSString* folder;
+	NSMutableSet* visitedFolders;
+	id owner;
+}
+
 @synthesize folder, visitedFolders, owner;
 
 + (id)dataWithFolder:(NSString*)folder visitedFolders:(NSMutableSet*)visitedFolders owner:(id)owner;

@@ -13,6 +13,27 @@
 OAK_DEBUG_VAR(FileBrowser_View);
 
 @implementation OakFileBrowserView
+{
+	OBJC_WATCH_LEAKS(OakFileBrowserView);
+
+	// These two properties are retained only as subviews
+	OFBOutlineView* outlineView;
+	OakStatusBar* headerView;
+
+	id delegate;
+	NSResponder* persistentNextResponder;
+
+	// Header view
+	BOOL canGoBackward;
+	BOOL canGoForward;
+
+	NSString* titleText;
+	NSImage*  titleImage;
+
+	BOOL showResizeIndicator;
+	BOOL resizeIndicatorOnRight;
+}
+
 @synthesize outlineView;
 @synthesize persistentNextResponder;
 @synthesize delegate, canGoBackward, canGoForward, titleText, titleImage;

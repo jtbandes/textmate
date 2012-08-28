@@ -21,6 +21,26 @@ OAK_DEBUG_VAR(SoftwareUpdate_Download);
 @end
 
 @implementation DownloadWindowController
+{
+	NSString* activityText;
+	CGFloat progress;
+	CGFloat secondsLeft;
+	NSString* statusText;
+	BOOL isDownloading;
+	BOOL canInstall;
+	BOOL isInstalling;
+	BOOL showUpdateBadge;
+
+	NSTimer* progressTimer;
+	NSDate* downloadStartDate;
+	NSString* versionOfDownload;
+
+	NSString* url;
+	key_chain_t keyChain;
+	NSString* archive;
+	shared_state_ptr sharedState;
+}
+
 @synthesize versionOfDownload, progressTimer, activityText, progress, statusText, isDownloading, canInstall, isInstalling, showUpdateBadge;
 @synthesize url, archive;
 

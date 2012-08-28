@@ -11,6 +11,17 @@
 @end
 
 @implementation OakFilterWindowController
+{
+	OBJC_WATCH_LEAKS(OakFilterWindowController);
+	IBOutlet OakFilterListView* filterView;
+	IBOutlet NSView* filterControlsView;
+	SEL action;
+	SEL accessoryAction;
+	id target;
+	BOOL sendActionOnSingleClick;
+	BOOL retainedSelf;
+}
+
 @synthesize target, action, accessoryAction, sendActionOnSingleClick;
 
 + (id)filterWindow

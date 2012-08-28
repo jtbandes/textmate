@@ -74,6 +74,14 @@ static NSAttributedString* PathComponentString (std::string const& path, std::st
 }
 
 @implementation FFFilePathCell
+{
+	NSImage* icon;
+	NSString* path;
+	NSString* base;
+	NSUInteger count;
+	BOOL mouseDownInIcon;
+}
+
 @synthesize icon, path, base, count;
 
 - (NSRect)iconFrameInCellFrame:(NSRect)cellFrame

@@ -25,6 +25,11 @@ NSString* const OakFindRegularExpressionOption     = @"regularExpression";
 NSString* const kUserDefaultsDisablePersistentClipboardHistory = @"disablePersistentClipboardHistory";
 
 @implementation OakPasteboardEntry
+{
+	NSString* string;
+	NSMutableDictionary* options;
+}
+
 @synthesize string, options;
 
 - (id)initWithString:(NSString*)aString andOptions:(NSDictionary*)someOptions
@@ -173,6 +178,16 @@ namespace
 }
 
 @implementation OakPasteboard
+{
+@private
+	NSString* pasteboardName;
+	NSMutableArray* entries;
+	NSDictionary* auxiliaryOptionsForCurrent;
+	NSUInteger index;
+	NSInteger changeCount;
+	BOOL avoidsDuplicates;
+}
+
 @synthesize avoidsDuplicates, auxiliaryOptionsForCurrent;
 
 - (NSPasteboard*)pasteboard

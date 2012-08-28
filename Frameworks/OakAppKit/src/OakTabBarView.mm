@@ -301,6 +301,29 @@ static id SafeObjectAtIndex (NSArray* array, NSUInteger index)
 @end
 
 @implementation OakTabBarView
+{
+	OBJC_WATCH_LEAKS(OakTabBarView);
+
+	NSMutableArray* tabTitles;         // bindable as ‘value’
+	NSMutableArray* tabToolTips;       // bindable as ‘toolTip’
+	NSMutableArray* tabModifiedStates; // bindable as ‘isEdited’
+
+	BOOL layoutNeedsUpdate;
+	NSUInteger selectedTab;            // bindable as ‘selectionIndexes’ (NSIndexSet)
+	NSUInteger hiddenTab;
+
+	BOOL isExpanded;
+
+	layout_metrics_ptr metrics;
+	std::vector<NSRect> tabRects;
+	std::map<NSUInteger, value_t> tabDropSpacing;
+	OakTimer* slideAroundAnimationTimer;
+
+	id <OakTabBarViewDelegate> delegate;
+	id <OakTabBarViewDataSource> dataSource;
+	std::vector<binding_info_t> bindings;
+}
+
 @synthesize isExpanded, delegate, dataSource, slideAroundAnimationTimer, layoutNeedsUpdate;
 
 - (BOOL)performKeyEquivalent:(NSEvent*)anEvent

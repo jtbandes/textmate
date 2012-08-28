@@ -111,6 +111,22 @@ namespace
 static BundlesManager* SharedInstance;
 
 @implementation BundlesManager
+{
+	std::vector<bundles_db::source_ptr> sourceList;
+	std::vector<bundles_db::bundle_ptr> bundlesIndex;
+
+	BOOL isBusy;
+	NSString* activityText;
+	double progress;
+
+	NSUInteger scheduledTasks;
+	NSString* threadActivityText;
+	double threadProgress;
+	NSTimer* progressTimer;
+
+	std::set<oak::uuid_t> installing;
+}
+
 @synthesize isBusy, activityText, progress;
 @synthesize threadActivityText, threadProgress, progressTimer;
 

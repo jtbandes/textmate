@@ -44,6 +44,17 @@ void OakOpenDocuments (NSArray* paths)
 @end
 
 @implementation AppController
+{
+	struct
+	{
+		std::string filter_string;
+		BOOL key_equivalent;
+		BOOL all_scopes;
+		int search_type;
+	} bundleItemSearch;
+	OakFilterWindowController* filterWindowController;
+}
+
 @synthesize filterWindowController;
 
 - (void)setup

@@ -64,6 +64,20 @@ static void DrawTextWithOptions (NSString* string, NSRect bounds, uint32_t textO
 OAK_DEBUG_VAR(OakControl);
 
 @implementation OakControl
+{
+@private
+	std::vector<layer_t> layout;
+	BOOL isTransparent;
+	BOOL mouseTrackingDisabled;
+
+	// ===================
+	// = MouseDown State =
+	// ===================
+
+	BOOL isInMouseDown;
+	NSPoint mouseDownPos;
+}
+
 @synthesize tag, mouseTrackingDisabled;
 
 - (std::vector<layer_t> const&)layout

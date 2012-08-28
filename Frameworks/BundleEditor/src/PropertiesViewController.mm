@@ -1,6 +1,13 @@
 #import "PropertiesViewController.h"
 
 @implementation PropertiesViewController
+{
+	IBOutlet NSObjectController* objectController;
+	IBOutlet NSView* alignmentView;
+	IBOutlet OakKeyEquivalentView* keyEquivalentView;
+	NSMutableDictionary* properties;
+}
+
 @synthesize properties;
 
 - (id)initWithName:(NSString*)aName

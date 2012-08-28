@@ -26,6 +26,15 @@
 @end
 
 @implementation OFBOutlineView
+{
+	OBJC_WATCH_LEAKS(OFBOutlineView);
+
+	id <OFBOutlineViewMenuDelegate> menuDelegate;
+	BOOL fieldEditorWasUp;
+	NSRect mouseHoverRect;
+	NSIndexSet* draggedRows;
+}
+
 @synthesize menuDelegate, draggedRows;
 
 - (void)dealloc

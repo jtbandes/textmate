@@ -72,18 +72,8 @@ struct layer_t
 
 @interface OakControl : OakView
 {
+@protected
 	NSInteger tag;
-@private
-	std::vector<layer_t> layout;
-	BOOL isTransparent;
-	BOOL mouseTrackingDisabled;
-
-	// ===================
-	// = MouseDown State =
-	// ===================
-
-	BOOL isInMouseDown;
-	NSPoint mouseDownPos;
 }
 - (void)drawLayer:(layer_t const&)aLayer;
 - (std::vector<layer_t> const&)layout;

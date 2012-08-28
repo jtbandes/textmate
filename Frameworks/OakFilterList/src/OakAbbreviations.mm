@@ -13,6 +13,12 @@ static NSString* const FCExpandedStringKey	= @"long";
 @end
 
 @implementation OakAbbreviations
+{
+@private
+	NSString* name;
+	NSMutableArray* bindings;
+}
+
 + (OakAbbreviations*)abbreviationsForName:(NSString*)aName
 {
 	static NSMutableDictionary* SharedInstances = [NSMutableDictionary new];

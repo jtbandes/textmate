@@ -1,7 +1,5 @@
 extern NSString* const OakSessionDidChangeNotification;
 
-@class OakFilterWindowController;
-
 namespace find_tags
 {
 	enum
@@ -21,15 +19,6 @@ namespace find_tags
 
 	IBOutlet NSPanel* goToLinePanel;
 	IBOutlet NSTextField* goToLineTextField;
-
-	struct
-	{
-		std::string filter_string;
-		BOOL key_equivalent;
-		BOOL all_scopes;
-		int search_type;
-	} bundleItemSearch;
-	OakFilterWindowController* filterWindowController;
 }
 
 - (IBAction)orderFrontFindPanel:(id)sender;

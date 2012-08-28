@@ -5,6 +5,11 @@
 #import "../highlight_ranges.h"
 
 @implementation OakBundleItemCell
+{
+	NSString* keyEquivalent;
+	NSAttributedString* attributedTabTrigger;
+}
+
 @synthesize keyEquivalent, attributedTabTrigger;
 
 - (id)copyWithZone:(NSZone*)zone

@@ -13,6 +13,14 @@ OAK_DEBUG_VAR(WindowFrameHelper);
 @end
 
 @implementation OakWindowFrameHelper
+{
+	OBJC_WATCH_LEAKS(OakWindowFrameHelper);
+
+	NSWindow* window;
+	NSString* autosaveName;
+	Class windowDelegateClass;
+}
+
 @synthesize window, autosaveName;
 
 + (OakWindowFrameHelper*)windowFrameHelperWithWindow:(NSWindow*)aWindow

@@ -127,12 +127,13 @@ namespace
 }
 
 @interface CommandRunnerURLProtocol : NSURLProtocol
-{
-	int key;
-}
 @end
 
 @implementation CommandRunnerURLProtocol
+{
+	int key;
+}
+
 + (void)load
 {
 	[self registerClass:self];

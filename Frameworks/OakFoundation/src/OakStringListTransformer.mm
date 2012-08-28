@@ -6,6 +6,10 @@
 @end
 
 @implementation OakStringListTransformer
+{
+	NSArray* stringList;
+}
+
 @synthesize stringList;
 
 + (Class)transformedValueClass         { return [NSNumber class]; }

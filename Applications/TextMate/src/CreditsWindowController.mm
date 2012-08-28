@@ -5,6 +5,13 @@
 @end
 
 @implementation CreditsWindowController
+{
+	OBJC_WATCH_LEAKS(CreditsWindowController);
+
+	IBOutlet WebView* webView;
+	NSURL* creditsURL;
+}
+
 @synthesize creditsURL;
 
 - (id)initWithURL:(NSURL*)aURL

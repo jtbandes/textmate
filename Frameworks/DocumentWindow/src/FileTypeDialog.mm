@@ -47,6 +47,39 @@ static NSArray* wrap (std::set<grammar_info_t> const& array)
 }
 
 @implementation FileTypeDialog
+{
+	IBOutlet NSTextField* alertTextField;
+	IBOutlet NSTextField* infoTextField;
+	IBOutlet NSTableView* fileTypesTableView;
+	IBOutlet NSButton* useForAllCheckBox;
+
+	IBOutlet NSWindow* installingBundleWindow;
+	IBOutlet NSTextField* installingBundleActivityTextField;
+	IBOutlet NSProgressIndicator* installingBundleProgressIndicator;
+
+	NSString* path;
+	std::string firstLine;
+
+	NSInteger enabledGrammars;
+	BOOL persistentSetting;
+	BOOL canOpenDocument;
+
+	NSArray* recommendedGrammars;
+	NSArray* installedGrammars;
+	NSArray* allGrammars;
+
+	NSArray* grammars;
+	NSIndexSet* selectedGrammarIndexes;
+
+	NSString* alertFormatString;
+	NSString* infoFormatString;
+	NSString* useForAllFormatString;
+
+	NSWindow* mainWindow;
+	id <FileTypeDialogDelegate> delegate;
+	void* contextInfo;
+}
+
 @synthesize path, enabledGrammars, persistentSetting, canOpenDocument;
 @synthesize recommendedGrammars, installedGrammars, allGrammars;
 @synthesize grammars, selectedGrammarIndexes;

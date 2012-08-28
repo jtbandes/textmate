@@ -10,13 +10,14 @@
 OAK_DEBUG_VAR(FilterList_SymbolChooser);
 
 @interface SymbolChooserViewController : NSViewController
+@end
+
+@implementation SymbolChooserViewController
 {
 	NSSearchField* searchField;
 	SymbolChooser* symbolChooser;
 }
-@end
 
-@implementation SymbolChooserViewController
 - (id)initWithSymbolChooser:(SymbolChooser*)chooser
 {
 	if((self = [super init]))
@@ -55,6 +56,13 @@ OAK_DEBUG_VAR(FilterList_SymbolChooser);
 @end
 
 @implementation SymbolChooser
+{
+	OBJC_WATCH_LEAKS(SymbolChooser);
+	document::document_ptr document;
+	std::string filterString;
+	SymbolChooserViewController* viewController;
+}
+
 - (NSViewController*)viewController
 {
 	if(!viewController)

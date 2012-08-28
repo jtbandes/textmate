@@ -10,6 +10,14 @@ static std::multimap<oak::uuid_t, HTMLOutputWindowController*> Windows;
 @end
 
 @implementation HTMLOutputWindowController
+{
+	OBJC_WATCH_LEAKS(HTMLOutputWindowController);
+
+	NSWindow* window;
+	OakHTMLOutputView* htmlOutputView;
+	command::runner_ptr runner;
+}
+
 - (id)initWithRunner:(command::runner_ptr const&)aRunner
 {
 	if(self = [[super init] retain])

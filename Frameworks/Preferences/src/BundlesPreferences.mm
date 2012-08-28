@@ -16,6 +16,17 @@ static std::string textify (std::string str)
 }
 
 @implementation BundlesPreferences
+{
+	IBOutlet MGScopeBar* categoriesScopeBar;
+	IBOutlet NSTableView* bundlesTableView;
+	IBOutlet NSTextField* activityTextField;
+	BundlesManager* bundlesManager;
+
+	std::vector<std::string> categories;
+	std::set<std::string> enabledCategories;
+	std::vector<bundles_db::bundle_ptr> bundles;
+}
+
 - (NSString*)identifier            { return @"Bundles"; }
 - (NSImage*)toolbarItemImage       { return [[NSWorkspace sharedWorkspace] iconForFileType:@"tmbundle"]; }
 - (NSString*)toolbarItemLabel      { return @"Bundles"; }

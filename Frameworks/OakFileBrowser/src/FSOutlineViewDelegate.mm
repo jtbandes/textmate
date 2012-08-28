@@ -99,6 +99,26 @@ static NSSet* VisibleItems (NSOutlineView* outlineView, FSItem* root, NSMutableS
 @end
 
 @implementation FSOutlineViewDelegate
+{
+	IBOutlet NSOutlineView* outlineView;
+	IBOutlet FSDataSource* dataSource;
+	NSArray* openURLs;
+	NSArray* modifiedURLs;
+
+	NSMutableSet* expandedURLs;
+	NSMutableSet* selectedURLs;
+
+	NSInteger itemsReloading;
+	NSInteger suppressCollapsing;
+	BOOL suppressAutoExpansion;
+
+	NSMutableSet* recursiveExpandPaths;
+	NSSet* pendingSelectURLs;
+	NSURL* pendingEditURL;
+	NSURL* pendingMakeVisibleURL;
+	CGFloat pendingScrollOffset;
+}
+
 @synthesize outlineView, dataSource, openURLs, modifiedURLs, pendingSelectURLs, pendingEditURL, pendingMakeVisibleURL, pendingScrollOffset;
 
 - (id)init

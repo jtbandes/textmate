@@ -17,17 +17,6 @@ PUBLIC extern NSString* const kUserDefaultsFileBrowserWidthKey;
 @end
 
 PUBLIC @interface OakFileBrowser : NSResponder <OFBOutlineViewMenuDelegate>
-{
-	OBJC_WATCH_LEAKS(OakFileBrowser);
-
-	NSURL* url; // Currently viewed root url
-	NSUInteger dataSourceOptions;
-	OakHistoryController* historyController;
-
-	id <OakFileBrowserDelegate> delegate;
-	OakFileBrowserView* view;
-	FSOutlineViewDelegate* outlineViewDelegate;
-}
 @property (nonatomic, assign) id <OakFileBrowserDelegate> delegate;
 @property (nonatomic, retain, readonly) NSView* view;
 

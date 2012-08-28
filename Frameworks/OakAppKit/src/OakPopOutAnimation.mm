@@ -10,14 +10,6 @@ static double const  kGrowDuration = 0.10;
 static double const  kFadeDuration = 0.60;
 
 @interface OakPopOutView : NSView
-{
-	NSRect baseFrame;
-	NSImage* contentImage;
-	NSDate* animationStartTime;
-
-	double growDuration;
-	double fadeDuration;
-}
 @property (nonatomic, retain) NSDate* animationStartTime;
 @property (nonatomic, retain) NSImage* contentImage;
 - (void)startAnimation:(id)sender;
@@ -56,6 +48,15 @@ static double bounce_curve (double t)
 }
 
 @implementation OakPopOutView
+{
+	NSRect baseFrame;
+	NSImage* contentImage;
+	NSDate* animationStartTime;
+
+	double growDuration;
+	double fadeDuration;
+}
+
 @synthesize animationStartTime, contentImage;
 
 - (id)initWithFrame:(NSRect)aRect

@@ -20,6 +20,11 @@ OAK_DEBUG_VAR(Preferences);
 static Preferences* SharedInstance;
 
 @implementation Preferences
+{
+	MASPreferencesWindowController* windowController;
+	NSArray* viewControllers;
+}
+
 + (Preferences*)sharedInstance
 {
 	return SharedInstance ?: [[Preferences new] autorelease];

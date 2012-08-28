@@ -5,6 +5,20 @@
 #import <oak/oak.h>
 
 @implementation FSItem
+{
+	NSImage* icon;
+	NSString* name;
+	NSString* toolTip;
+	NSInteger labelIndex;
+	NSURL* url;
+	NSURL* target;
+	FSItemURLType urlType;
+	NSArray* children;
+	BOOL leaf;
+	BOOL group;
+	BOOL sortAsFolder;
+}
+
 @synthesize icon, name, toolTip, labelIndex, url, urlType, target, children, leaf, group, sortAsFolder;
 
 - (FSItem*)initWithURL:(NSURL*)anURL

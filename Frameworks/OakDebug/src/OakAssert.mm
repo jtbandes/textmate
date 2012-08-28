@@ -2,7 +2,7 @@
 #import <oak/oak.h>
 #import <text/format.h>
 
-@interface OakExceptionHandlerDelegate : NSObject { }
+@interface OakExceptionHandlerDelegate : NSObject
 @end
 
 PUBLIC std::string OakStackDump (int linesToSkip)

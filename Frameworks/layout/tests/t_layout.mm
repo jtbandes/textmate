@@ -19,13 +19,6 @@
 typedef std::shared_ptr<ng::layout_t> layout_ptr;
 
 @interface MyView : NSView
-{
-	ng::buffer_t buffer;
-	ng::ranges_t selection;
-	layout_ptr layout;
-
-	NSDate* optionDownDate;
-}
 @property (nonatomic, retain) NSDate* optionDownDate;
 @property (nonatomic, assign) ng::ranges_t const& selection;
 - (void)updateFrameSize;
@@ -91,6 +84,13 @@ private:
 #define AUTO_REFRESH refresh_t dummy(self, *layout)
 
 @implementation MyView
+{
+	ng::buffer_t buffer;
+	ng::ranges_t selection;
+	layout_ptr layout;
+
+	NSDate* optionDownDate;
+}
 @synthesize optionDownDate, selection;
 
 - (BOOL)isFlipped { return YES; }

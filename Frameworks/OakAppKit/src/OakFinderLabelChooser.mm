@@ -9,6 +9,18 @@ static const CGFloat LabelNameHeight = 15;
 @end
 
 @implementation OakFinderLabelChooser
+{
+	OBJC_WATCH_LEAKS(OakFinderLabelChooser);
+
+	NSInteger selectedIndex;
+	NSInteger highlightedIndex;
+	NSMutableArray* labelNames;
+
+	BOOL enabled;
+	id target;
+	SEL action;
+}
+
 @synthesize selectedIndex, highlightedIndex;
 @synthesize enabled, target, action;
 

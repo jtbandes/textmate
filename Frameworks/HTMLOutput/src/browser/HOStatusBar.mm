@@ -5,6 +5,18 @@
 @end
 
 @implementation HOStatusBar
+{
+	BOOL isBusy;
+	NSString* statusText;
+	BOOL canGoBack;
+	BOOL canGoForward;
+
+	NSProgressIndicator* spinner;
+	NSProgressIndicator* progressIndicator;
+
+	id delegate;
+}
+
 @synthesize isBusy, canGoBack, canGoForward, statusText, delegate;
 
 - (id)initWithFrame:(NSRect)frame

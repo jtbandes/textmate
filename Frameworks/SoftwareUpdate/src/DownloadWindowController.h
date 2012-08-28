@@ -9,25 +9,6 @@ struct shared_state_t
 typedef std::shared_ptr<shared_state_t> shared_state_ptr;
 
 @interface DownloadWindowController : NSWindowController
-{
-	NSString* activityText;
-	CGFloat progress;
-	CGFloat secondsLeft;
-	NSString* statusText;
-	BOOL isDownloading;
-	BOOL canInstall;
-	BOOL isInstalling;
-	BOOL showUpdateBadge;
-
-	NSTimer* progressTimer;
-	NSDate* downloadStartDate;
-	NSString* versionOfDownload;
-
-	NSString* url;
-	key_chain_t keyChain;
-	NSString* archive;
-	shared_state_ptr sharedState;
-}
 @property (nonatomic, retain) NSString* versionOfDownload; // API
 @property (nonatomic, readonly) BOOL isVisible;            // API
 

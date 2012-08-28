@@ -97,9 +97,6 @@ namespace // PopulateMenu{Flat,Hierarchical}
 }
 
 @interface OakCustomizeEncodingsWindowController : NSWindowController
-{
-	NSMutableArray* encodings;
-}
 + (OakCustomizeEncodingsWindowController*)sharedInstance;
 @end
 
@@ -108,6 +105,12 @@ namespace // PopulateMenu{Flat,Hierarchical}
 @end
 
 @implementation OakEncodingPopUpButton
+{
+	NSArray* availableEncodings;
+	NSString* encoding;
+	NSMenuItem* firstMenuItem;
+}
+
 @synthesize encoding, availableEncodings;
 
 + (void)initialize
@@ -252,6 +255,10 @@ namespace // PopulateMenu{Flat,Hierarchical}
 static OakCustomizeEncodingsWindowController* SharedInstance;
 
 @implementation OakCustomizeEncodingsWindowController
+{
+	NSMutableArray* encodings;
+}
+
 + (OakCustomizeEncodingsWindowController*)sharedInstance
 {
 	return SharedInstance ?: [[OakCustomizeEncodingsWindowController new] autorelease];

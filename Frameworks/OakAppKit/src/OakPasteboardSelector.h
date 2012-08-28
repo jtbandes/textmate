@@ -3,11 +3,6 @@
 @class OakPasteboardSelectorTableViewHelper;
 
 PUBLIC @interface OakPasteboardSelector : NSWindowController
-{
-@private
-	IBOutlet NSTableView* tableView;
-	OakPasteboardSelectorTableViewHelper* tableViewHelper;
-}
 + (OakPasteboardSelector*)sharedInstance;
 - (void)setIndex:(unsigned)index;
 - (void)setEntries:(NSArray*)entries;

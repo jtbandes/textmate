@@ -40,6 +40,26 @@ struct data_source_t
 @end
 
 @implementation GutterView
+{
+	IBOutlet NSView* partnerView;
+	NSFont* lineNumberFont;
+	NSColor* foregroundColor;
+	NSColor* backgroundColor;
+	NSColor* iconColor;
+	NSColor* selectionForegroundColor;
+	NSColor* selectionBackgroundColor;
+	NSColor* selectionIconColor;
+	NSColor* selectionBorderColor;
+	id <GutterViewDelegate> delegate;
+	std::vector<struct data_source_t> columnDataSources;
+	NSMutableSet* hiddenColumns;
+	std::string highlightedRange;
+	std::vector<CGRect> backgroundRects, borderRects;
+
+	NSPoint mouseDownAtPoint;
+	NSPoint mouseHoveringAtPoint;
+}
+
 @synthesize partnerView, lineNumberFont, delegate;
 @synthesize foregroundColor, backgroundColor, iconColor, selectionForegroundColor, selectionBackgroundColor, selectionIconColor, selectionBorderColor;
 

@@ -8,14 +8,15 @@ OAK_DEBUG_VAR(OakTimer);
 @end
 
 @interface OakTimerHelper : NSObject
-{
-	OBJC_WATCH_LEAKS(OakTimerHelper);
-	OakTimer* timerProxy; // non-retained
-}
 - (id)initWithOakTimer:(OakTimer*)aTimer;
 @end
 
 @implementation OakTimerHelper
+{
+	OBJC_WATCH_LEAKS(OakTimerHelper);
+	OakTimer* timerProxy; // non-retained
+}
+
 - (id)initWithOakTimer:(OakTimer*)aTimer
 {
 	if((self = [super init]))
@@ -30,6 +31,16 @@ OAK_DEBUG_VAR(OakTimer);
 @end
 
 @implementation OakTimer
+{
+	OBJC_WATCH_LEAKS(OakTimer);
+
+	OakTimerHelper* helper;
+	NSTimer* timer;
+	id target;
+	SEL selector;
+	id userInfo;
+}
+
 @synthesize timer, target, selector, userInfo;
 
 - (id)initWithTimeInterval:(NSTimeInterval)seconds repeats:(BOOL)repeats

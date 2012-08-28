@@ -6,6 +6,14 @@
 #import <oak/debug.h>
 
 @implementation EncodingViewController
+{
+	IBOutlet OakEncodingPopUpButton* popUpButton;
+	IBOutlet NSTextView* textView;
+
+	char const* first;
+	char const* last;
+}
+
 - (id)initWithFirst:(char const*)firstPointer last:(char const*)lastPointer
 {
 	if(self = [super initWithNibName:@"EncodingView" bundle:[NSBundle bundleForClass:[self class]]])

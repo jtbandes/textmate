@@ -1,12 +1,13 @@
 #import <test/cocoa.h>
 
 @interface MyTextView : NSView <NSTextInput>
-{
-	NSString* myTextStorage;
-}
 @end
 
 @implementation MyTextView
+{
+	NSString* myTextStorage;
+}
+
 - (id)initWithFrame:(NSRect)aRect
 {
 	if((self = [super initWithFrame:aRect]))

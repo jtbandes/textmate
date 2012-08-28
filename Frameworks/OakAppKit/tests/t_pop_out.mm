@@ -3,8 +3,6 @@
 #import <oak/oak.h>
 
 @interface MyView : NSView
-{
-}
 @end
 
 @implementation MyView

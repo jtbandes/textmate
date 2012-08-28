@@ -22,6 +22,14 @@
 OAK_DEBUG_VAR(AppStartup);
 
 @implementation AppStartupController
+{
+	IBOutlet AppController* appController;
+
+	NSAppleEventDescriptor* openEvent;
+	NSArray* openDocumentsArray;
+	BOOL disableSessionRestore;
+}
+
 @synthesize openEvent, openDocumentsArray;
 
 - (void)userDefaultsDidChange:(id)sender

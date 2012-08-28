@@ -4,6 +4,14 @@
 #import <text/ranker.h>
 
 @implementation FileChooserSymbolItem
+{
+	NSString* path;
+	NSString* selectionString;
+	NSString* identifier;
+	NSAttributedString* displayString;
+	NSAttributedString* infoString;
+}
+
 @synthesize path, selectionString, identifier, displayString, infoString;
 
 - (id)initWithPath:(NSString*)aPath selectionString:(NSString*)aSelectionString identifier:(NSString*)anIdentifier displayString:(NSAttributedString*)aDisplayString infoString:(NSAttributedString*)anInfoString
