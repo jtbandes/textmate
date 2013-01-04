@@ -1,9 +1,5 @@
 @interface FFFilePathCell : NSCell
 {
-	NSImage* icon;
-	NSString* path;
-	NSString* base;
-	NSUInteger count;
 	BOOL mouseDownInIcon;
 }
 @property (nonatomic, retain) NSImage* icon;

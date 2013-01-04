@@ -57,7 +57,6 @@ private:
 };
 
 @implementation FFMatch
-@synthesize icon;
 
 - (id)initWithMatch:(find::match_t const&)aMatch;
 {
@@ -75,7 +74,7 @@ private:
 
 - (id)copyWithZone:(NSZone*)zone
 {
-	return [self retain];
+	return self;
 }
 
 - (void)dealloc
@@ -86,8 +85,6 @@ private:
 		delete callback;
 		callback = NULL;
 	}
-	self.icon = nil;
-	[super dealloc];
 }
 
 - (find::match_t const&)match
@@ -97,11 +94,11 @@ private:
 
 - (NSImage*)icon
 {
-	if(!icon)
+	if(!_icon)
 		self.icon = [OakFileIconImage fileIconImageWithPath:[NSString stringWithCxxString:match.document->path()] isModified:match.document->is_modified()];
 	if(!callback)
 		match.document->add_callback(callback = new document_callback_t(self));
-	return icon;
+	return _icon;
 }
 
 - (void)updateIcon
@@ -138,9 +135,6 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 // ==============
 // = Public API =
 // ==============
-
-@synthesize options, scannerProbeTimer, currentPath, projectIdentifier, documentIdentifier;
-@synthesize hasPerformedReplacement, hasPerformedSave;
 
 - (NSArray*)allDocumentsWithMatches
 {
@@ -195,7 +189,7 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 	scanner.reset(new find::scan_path_t);
 	scanner->set_folder_options(folderOptions);
 	scanner->set_string(searchString);
-	scanner->set_file_options(options);
+	scanner->set_file_options(_options);
 
 	timer.reset();
 	self.scannerProbeTimer = [OakTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(updateMatches:) userInfo:NULL repeats:YES];
@@ -258,14 +252,14 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 
 - (void)setHasPerformedReplacement:(BOOL)flag
 {
-	ASSERTF(!hasPerformedReplacement || !flag, "Replacement has already been performed");
-	hasPerformedReplacement = flag;
+	ASSERTF(!_hasPerformedReplacement || !flag, "Replacement has already been performed");
+	_hasPerformedReplacement = flag;
 }
 
 - (void)setHasPerformedSave:(BOOL)flag
 {
-	ASSERTF(!hasPerformedSave || !flag, "Save has already been performed");
-	hasPerformedSave = flag;
+	ASSERTF(!_hasPerformedSave || !flag, "Save has already been performed");
+	_hasPerformedSave = flag;
 }
 
 - (NSUInteger)saveAllDocuments
@@ -301,9 +295,9 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 			if(![matchInfo objectForKey:uuid])
 			{
 				[matchInfo setObject:[NSMutableArray array] forKey:uuid];
-				[matchingDocuments addObject:[[[FFMatch alloc] initWithDocument:pair->first] autorelease]];
+				[matchingDocuments addObject:[[FFMatch alloc] initWithDocument:pair->first]];
 			}
-			FFMatch* match = [[[FFMatch alloc] initWithMatch:pair->second] autorelease];
+			FFMatch* match = [[FFMatch alloc] initWithMatch:pair->second];
 			[[matchInfo objectForKey:uuid] addObject:match];
 			if(match.match.binary)
 				[replacementMatchesToSkip addObject:match];
@@ -353,11 +347,5 @@ OAK_DEBUG_VAR(Find_FolderSearch);
 {
 	D(DBF_Find_FolderSearch, bug("\n"););
 	[self stop];
-	self.currentPath = nil;
-	self.projectIdentifier = nil;
-	[replacementMatchesToSkip release];
-	[matchingDocuments release];
-	[matchInfo release];
-	[super dealloc];
 }
 @end

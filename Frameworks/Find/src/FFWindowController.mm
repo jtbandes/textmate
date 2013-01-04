@@ -127,16 +127,13 @@ NSString* const FFSearchInOpenFiles     = @"FFSearchInOpenFiles";
 @property (nonatomic, readonly) NSString* rootPath;
 
 @property (nonatomic, retain) FFFindWindow* window;
+@property (nonatomic, retain) NSAlert* currentAlert;
 @end
 
 @implementation FFWindowController
-@synthesize recentGlobs;
-@synthesize resultsHeaderText;
 @dynamic window;
-@synthesize canSetFileTypes, canSetWrapAround, statusMessage, searchFolder, searchIn, findString, replaceString;
-@synthesize findRegularExpression, findFullWords, findIgnoreWhitespace, followLinks, searchHiddenFolders;
-@synthesize enableReplacementSelectionCheckboxes;
-@synthesize searcher, delegate;
+@synthesize searchFolder=_searchFolder;
+@synthesize projectFolder=_projectFolder;
 
 + (void)initialize
 {
@@ -158,10 +155,10 @@ NSString* const FFSearchInOpenFiles     = @"FFSearchInOpenFiles";
 	{
 		D(DBF_Find_WindowController, bug("\n"););
 
-		canSetWrapAround = YES;
-		canSetFileTypes = NO;
+		_canSetWrapAround = YES;
+		_canSetFileTypes = NO;
 
-		recentGlobs   = [[OakHistoryList alloc] initWithName:@"Find in Folder Globs.default" stackSize:10 defaultItems:@"*", @"*.txt", @"*.{c,h}", nil];
+		_recentGlobs  = [[OakHistoryList alloc] initWithName:@"Find in Folder Globs.default" stackSize:10 defaultItems:@"*", @"*.txt", @"*.{c,h}", nil];
 		recentFolders = [[OakHistoryList alloc] initWithName:@"findRecentPlaces" stackSize:6];
 
 		[self addObserver:self forKeyPath:@"showReplacementSelectionCheckboxes" options:0 context:NULL];
@@ -177,13 +174,8 @@ NSString* const FFSearchInOpenFiles     = @"FFSearchInOpenFiles";
 
 - (void)dealloc
 {
-	// FIXME Add missing releases
 	[self removeObserver:self forKeyPath:@"showReplacementSelectionCheckboxes"];
 	[self.window removeObserver:self forKeyPath:@"firstResponder"];
-	self.searcher = nil;
-	[recentGlobs release];
-	[recentFolders release];
-	[super dealloc];
 }
 
 - (IBAction)showWindow:(id)sender
@@ -211,6 +203,7 @@ struct operation_t
 	[discardButton setKeyEquivalent:@"d"];
 	[discardButton setKeyEquivalentModifierMask:NSCommandKeyMask];
 	[sheet beginSheetModalForWindow:self.window modalDelegate:self didEndSelector:@selector(unsavedReplacementsSheetDidEnd:returnCode:contextInfo:) contextInfo:operation];
+	self.currentAlert = sheet;
 }
 
 - (BOOL)windowShouldClose:(id)window
@@ -224,8 +217,9 @@ struct operation_t
 
 - (void)unsavedReplacementsSheetDidEnd:(NSAlert*)alert returnCode:(NSInteger)returnCode contextInfo:(operation_t*)operation
 {
+	self.currentAlert = nil;
+	
 	D(DBF_Find_WindowController, bug("\n"););
-	[alert release];
 	switch(returnCode)
 	{
 		case NSAlertFirstButtonReturn: // Save All
@@ -260,31 +254,30 @@ struct operation_t
 			sb::cell_t::button(rightArrow, @selector(expandFindAllResults:), self).pressed_image(pressedRightArrow).enabled(resultsHeaderEnabled) :
 			sb::cell_t::button(downArrow, @selector(collapseFindAllResults:), self).pressed_image(pressedDownArrow).enabled(resultsHeaderEnabled),
 		sb::cell_t::dropdown(gear, @selector(showFindInFolderOptionsDropdown:), self),
-		sb::cell_t::dropdown(resultsHeaderText, @selector(showTableOfContentsDropdown:), self).size(30, CGFLOAT_MAX),
+		sb::cell_t::dropdown(_resultsHeaderText, @selector(showTableOfContentsDropdown:), self).size(30, CGFLOAT_MAX),
 	};
 	SetCells(findAllResultsHeaderView, cells);
 }
 
 - (void)setResultsHeaderText:(NSString*)text
 {
-	if(text != resultsHeaderText)
+	if(text != _resultsHeaderText)
 	{
-		[resultsHeaderText release];
-		resultsHeaderText = [text retain];
+		_resultsHeaderText = text;
 		[self updateResultsHeader];
 	}
 }
 
 - (void)updateGoToMenu:(NSMenu*)menu
 {
-	if(searcher.allDocumentsWithMatches.count == 0)
+	if(_searcher.allDocumentsWithMatches.count == 0)
 	{
 		[[menu addItemWithTitle:@"No Results" action:@selector(dummy:) keyEquivalent:@""] setEnabled:NO];
 	}
 	else
 	{
 		NSUInteger key = 1;
-		for(FFMatch* match in searcher.allDocumentsWithMatches)
+		for(FFMatch* match in _searcher.allDocumentsWithMatches)
 		{
 			document::document_ptr doc = [match match].document;
 			std::string const& title   = doc->path() == NULL_STR ? doc->display_name() : path::relative_to(doc->path(), [[self rootPath] UTF8String]);
@@ -298,7 +291,7 @@ struct operation_t
 
 - (IBAction)showTableOfContentsDropdown:(id)sender
 {
-	NSMenu* menu = [[[NSMenu alloc] initWithTitle:@"TOC"] autorelease];
+	NSMenu* menu = [[NSMenu alloc] initWithTitle:@"TOC"];
 	[self updateGoToMenu:menu];
 	[findAllResultsHeaderView showMenu:menu withSelectedIndex:0 forCellWithTag:[sender tag] font:[NSFont controlContentFontOfSize:12.0] popup:NO];
 }
@@ -362,7 +355,7 @@ struct operation_t
 
 - (IBAction)showFindInFolderOptionsDropdown:(id)sender
 {
-	NSMenu* menu = [[[NSMenu alloc] initWithTitle:@"Options"] autorelease];
+	NSMenu* menu = [[NSMenu alloc] initWithTitle:@"Options"];
 
 	[menu addItemWithTitle:@"Copy Matching Parts"                action:@selector(copyMatchingParts:)             keyEquivalent:@""];
 	[menu addItemWithTitle:@"Copy Matching Parts With Filenames" action:@selector(copyMatchingPartsWithFilename:) keyEquivalent:@""];
@@ -465,13 +458,12 @@ struct operation_t
 
 - (NSString*)searchFolder
 {
-	return [searchFolder isEqualToString:FFSearchInProjectFolder] ? self.projectFolder : searchFolder;
+	return [_searchFolder isEqualToString:FFSearchInProjectFolder] ? self.projectFolder : _searchFolder;
 }
 
 - (void)updateSelectedFolderItem
 {
-	[searchFolder release];
-	searchFolder = [searchIn retain];
+	_searchFolder = _searchIn;
 
 	[FFFolderMenu addFolderMenuAtPath:self.searchFolder toMenuItem:[[findInPopUp menu] itemWithTag:MenuItemSelectedFolder] withOwner:self];
 	[self buildRecentPlacesPopUpMenu];
@@ -524,10 +516,9 @@ Any other string:
 	D(DBF_Find_WindowController, bug("%s\n", where.UTF8String););
 	[self window]; // force nib to be loaded
 
-	if(searchIn != where && ![where isEqualToString:FFSearchInOtherFolder])
+	if(_searchIn != where && ![where isEqualToString:FFSearchInOtherFolder])
 	{
-		[searchIn release];
-		searchIn = [where copy];
+		_searchIn = [where copy];
 	}
 
 	if(self.isDirty && ([where isEqualToString:FFSearchInSelection] || [where isEqualToString:FFSearchInDocument]))
@@ -563,7 +554,7 @@ Any other string:
 		self.canSetWrapAround        = YES;
 		self.canSetFileTypes         = NO;
 		// Hide the find all results list only if the current search results are not from a document.
-		self.isShowingFindAllResults = (searcher.documentIdentifier != nil && self.window.isVisible);
+		self.isShowingFindAllResults = (_searcher.documentIdentifier != nil && self.window.isVisible);
 	}
 	else
 	{
@@ -571,7 +562,7 @@ Any other string:
 		self.canSetWrapAround        = NO;
 		self.canSetFileTypes         = YES;
 		self.isShowingFindAllResults = YES;
-		[recentFolders addObject:searchIn];
+		[recentFolders addObject:_searchIn];
 	}
 
 	if(self.isSearchingFolders)
@@ -591,7 +582,7 @@ Any other string:
 
 - (BOOL)isSearchingFolders
 {
-	return (searchIn != FFSearchInDocument && searchIn != FFSearchInSelection && searchIn != FFSearchInOpenFiles);
+	return (_searchIn != FFSearchInDocument && _searchIn != FFSearchInSelection && _searchIn != FFSearchInOpenFiles);
 }
 
 - (BOOL)isBusy
@@ -624,11 +615,11 @@ Any other string:
 
 - (BOOL)canReplaceAll
 {
-	if(searcher.hasPerformedReplacement)
+	if(_searcher.hasPerformedReplacement)
 		return NO;
 	if(!self.isSearchingFolders)
-			return !self.isShowingFindAllResults || (searcher.countOfSelectedMatches > 0);
-	else	return !self.isBusy && (searcher.countOfSelectedMatches > 0);
+			return !self.isShowingFindAllResults || (_searcher.countOfSelectedMatches > 0);
+	else	return !self.isBusy && (_searcher.countOfSelectedMatches > 0);
 }
 
 + (NSSet*)keyPathsForValuesAffectingCanReplaceSelected
@@ -638,7 +629,7 @@ Any other string:
 
 - (BOOL)canReplaceSelected
 {
-	return self.canReplaceAll && self.isShowingFindAllResults && (searcher.countOfSelectedMatches != searcher.countOfMatches);
+	return self.canReplaceAll && self.isShowingFindAllResults && (_searcher.countOfSelectedMatches != _searcher.countOfMatches);
 }
 
 + (NSSet*)keyPathsForValuesAffectingIsDirty
@@ -648,22 +639,21 @@ Any other string:
 
 - (BOOL)isDirty
 {
-	return searcher.documentIdentifier == nil && searcher.hasPerformedReplacement && !searcher.hasPerformedSave;
+	return _searcher.documentIdentifier == nil && _searcher.hasPerformedReplacement && !_searcher.hasPerformedSave;
 }
 
 // =============================
 // = Stupid Accessor Functions =
 // =============================
 
-- (NSString*)projectFolder { return projectFolder ?: @""; }
+- (NSString*)projectFolder { return _projectFolder ?: @""; }
 
 - (void)setProjectFolder:(NSString*)folder
 {
-	if(folder != projectFolder && ![folder isEqualToString:projectFolder])
+	if(folder != _projectFolder && ![folder isEqualToString:_projectFolder])
 	{
-		[projectFolder release];
-		projectFolder = [(folder ?: @"") retain];
-		self.recentGlobs = [[[OakHistoryList alloc] initWithName:[NSString stringWithFormat:@"Find in Folder Globs.%@", projectFolder] stackSize:10 defaultItems:@"*", @"*.txt", @"*.{c,h}", nil] autorelease];
+		_projectFolder = folder ?: @"";
+		self.recentGlobs = [[OakHistoryList alloc] initWithName:[NSString stringWithFormat:@"Find in Folder Globs.%@", _projectFolder] stackSize:10 defaultItems:@"*", @"*.txt", @"*.{c,h}", nil];
 	}
 }
 
@@ -674,19 +664,17 @@ Any other string:
 
 - (void)setFindString:(NSString*)aString
 {
-	if(aString != findString && ![aString isEqualToString:findString])
+	if(aString != _findString && ![aString isEqualToString:_findString])
 	{
-		[findString release];
-		findString = [(aString ?: @"") retain];
+		_findString = aString ?: @"";
 	}
 }
 
 - (void)setReplaceString:(NSString*)aString
 {
-	if(aString != replaceString && ![aString isEqualToString:replaceString])
+	if(aString != _replaceString && ![aString isEqualToString:_replaceString])
 	{
-		[replaceString release];
-		replaceString = [(aString ?: @"") retain];
+		_replaceString = aString ?: @"";
 
 		if(previewReplacements)
 			[findAllResultsOutlineView reloadData];
@@ -695,7 +683,7 @@ Any other string:
 
 - (NSString*)globString
 {
-	return recentGlobs.head;
+	return _recentGlobs.head;
 }
 
 - (BOOL)isShowingFindAllResults
@@ -720,19 +708,19 @@ Any other string:
 
 - (void)setCanSetWrapAround:(BOOL)flag
 {
-	canSetWrapAround = flag;
-	[wrapAroundField setHidden:!canSetWrapAround];
+	_canSetWrapAround = flag;
+	[wrapAroundField setHidden:!_canSetWrapAround];
 }
 
 - (void)setCanSetFileTypes:(BOOL)flag
 {
-	canSetFileTypes = flag;
+	_canSetFileTypes = flag;
 	[globField setHidden:!flag];
 	[globFieldLabel setHidden:!flag];
 }
 
-- (BOOL)findIgnoreWhitespace { return findIgnoreWhitespace && !findRegularExpression; }
-- (BOOL)findFullWords { return findFullWords && !findRegularExpression; }
+- (BOOL)findIgnoreWhitespace { return _findIgnoreWhitespace && !_findRegularExpression; }
+- (BOOL)findFullWords { return _findFullWords && !_findRegularExpression; }
 
 + (NSSet*)keyPathsForValuesAffectingShowReplacementSelectionCheckboxes
 {
@@ -741,12 +729,12 @@ Any other string:
 
 - (BOOL)showReplacementSelectionCheckboxes
 {
-	return enableReplacementSelectionCheckboxes && !searcher.hasPerformedReplacement;
+	return _enableReplacementSelectionCheckboxes && !_searcher.hasPerformedReplacement;
 }
 
 - (NSString*)rootPath
 {
-	std::string const& rootPath = [searcher folderOptions].path == find::folder_scan_settings_t::open_files ? self.projectFolder.UTF8String : [searcher folderOptions].path;
+	std::string const& rootPath = [_searcher folderOptions].path == find::folder_scan_settings_t::open_files ? self.projectFolder.UTF8String : [_searcher folderOptions].path;
 	return [NSString stringWithCxxString:rootPath];
 }
 
@@ -804,7 +792,7 @@ Any other string:
 
 - (void)windowWillClose:(NSNotification*)aNotification
 {
-	[searcher stop];
+	[_searcher stop];
 	[self commitEditing];
 }
 
@@ -814,30 +802,29 @@ Any other string:
 
 - (void)setSearcher:(FFDocumentSearch*)aFolderSearch
 {
-	if(searcher != aFolderSearch)
+	if(_searcher != aFolderSearch)
 	{
-		if(searcher)
+		if(_searcher)
 		{
-			[searcher removeObserver:self forKeyPath:@"currentPath"];
-			[searcher removeObserver:self forKeyPath:@"hasPerformedReplacement"];
-			[[NSNotificationCenter defaultCenter] removeObserver:self name:FFDocumentSearchDidReceiveResultsNotification object:searcher];
-			[[NSNotificationCenter defaultCenter] removeObserver:self name:FFDocumentSearchDidFinishNotification object:searcher];
+			[_searcher removeObserver:self forKeyPath:@"currentPath"];
+			[_searcher removeObserver:self forKeyPath:@"hasPerformedReplacement"];
+			[[NSNotificationCenter defaultCenter] removeObserver:self name:FFDocumentSearchDidReceiveResultsNotification object:_searcher];
+			[[NSNotificationCenter defaultCenter] removeObserver:self name:FFDocumentSearchDidFinishNotification object:_searcher];
 
-			for(FFMatch* fileMatch in [searcher allDocumentsWithMatches])
+			for(FFMatch* fileMatch in [_searcher allDocumentsWithMatches])
 			{
 				if(document::document_ptr doc = [fileMatch match].document)
 					doc->remove_all_marks("search");
 			}
 		}
-		[searcher release];
-		searcher = [aFolderSearch retain];
+		_searcher = aFolderSearch;
 		[findAllResultsOutlineView reloadData];
-		if(searcher)
+		if(_searcher)
 		{
-			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(folderSearchDidReceiveResults:) name:FFDocumentSearchDidReceiveResultsNotification object:searcher];
-			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(folderSearchDidFinish:) name:FFDocumentSearchDidFinishNotification object:searcher];
-			[searcher addObserver:self forKeyPath:@"currentPath" options:(NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld) context:NULL];
-			[searcher addObserver:self forKeyPath:@"hasPerformedReplacement" options:0 context:NULL];
+			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(folderSearchDidReceiveResults:) name:FFDocumentSearchDidReceiveResultsNotification object:_searcher];
+			[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(folderSearchDidFinish:) name:FFDocumentSearchDidFinishNotification object:_searcher];
+			[_searcher addObserver:self forKeyPath:@"currentPath" options:(NSKeyValueObservingOptionNew|NSKeyValueObservingOptionOld) context:NULL];
+			[_searcher addObserver:self forKeyPath:@"hasPerformedReplacement" options:0 context:NULL];
 
 			// UI setup
 			self.isShowingFindAllResults = YES;
@@ -848,21 +835,21 @@ Any other string:
 
 			resultsHeaderEnabled = YES;
 			expandCollapseAllIsExpanding = NO;
-			if([searcher folderOptions].path == find::folder_scan_settings_t::open_files)
+			if([_searcher folderOptions].path == find::folder_scan_settings_t::open_files)
 			{
 				self.resultsHeaderText = MSG_FIND_ALL_RESULTS_OPEN_FILES;
 			}
-			else if(searcher.documentIdentifier)
+			else if(_searcher.documentIdentifier)
 			{
-				if(document::document_ptr doc = document::find(to_s(searcher.documentIdentifier)))
+				if(document::document_ptr doc = document::find(to_s(_searcher.documentIdentifier)))
 					self.resultsHeaderText = [NSString localizedStringWithFormat:MSG_FIND_ALL_IN_DOCUMENT_HEADER, [NSString stringWithCxxString:doc->display_name()]];
 			}
 			else
 			{
-				self.resultsHeaderText = [NSString localizedStringWithFormat:MSG_FIND_ALL_RESULTS, [NSString stringWithCxxString:path::with_tilde([searcher folderOptions].path)], [globField stringValue]];
+				self.resultsHeaderText = [NSString localizedStringWithFormat:MSG_FIND_ALL_RESULTS, [NSString stringWithCxxString:path::with_tilde([_searcher folderOptions].path)], [globField stringValue]];
 			}
 		}
-		[searcher start];
+		[_searcher start];
 	}
 }
 
@@ -880,19 +867,19 @@ Any other string:
 {
 	[self setIsBusy:NO];
 
-	if(!searcher)
+	if(!_searcher)
 		return;
 
-	for(FFMatch* fileMatch in [searcher allDocumentsWithMatches])
+	for(FFMatch* fileMatch in [_searcher allDocumentsWithMatches])
 	{
 		if(document::document_ptr doc = [fileMatch match].document)
 		{
-			for(FFMatch* match in [searcher allMatchesForDocumentIdentifier:[NSString stringWithCxxString:doc->identifier()]])
+			for(FFMatch* match in [_searcher allMatchesForDocumentIdentifier:[NSString stringWithCxxString:doc->identifier()]])
 				doc->add_mark([match match].range, "search");
 		}
 	}
 
-	NSUInteger totalMatches = [searcher countOfMatches];
+	NSUInteger totalMatches = [_searcher countOfMatches];
 	NSString* fmt = MSG_ZERO_MATCHES_FMT;
 	switch(totalMatches)
 	{
@@ -901,20 +888,20 @@ Any other string:
 		default: fmt = MSG_MULTIPLE_MATCHES_FMT; break;
 	}
 
-	NSNumberFormatter* formatter = [[NSNumberFormatter new] autorelease]; // FIXME we want to cache this as it is expensive
+	NSNumberFormatter* formatter = [NSNumberFormatter new]; // FIXME we want to cache this as it is expensive
 	[formatter setPositiveFormat:@"#,##0"];
 	[formatter setLocalizesFormat:YES];
 
 	NSString* msg = [NSString localizedStringWithFormat:fmt,
-							  [searcher searchString],
+							  [_searcher searchString],
 							  [formatter stringFromNumber:@(totalMatches)]
 						  ];
 
-	if(!searcher.documentIdentifier)
+	if(!_searcher.documentIdentifier)
 	{
-		msg = [msg stringByAppendingFormat:([searcher scannedFileCount] == 1 ? MSG_SEARCHED_FILES_ONE : MSG_SEARCHED_FILES_MULTIPLE),
-					[formatter stringFromNumber:@([searcher scannedFileCount])],
-					[searcher searchDuration]
+		msg = [msg stringByAppendingFormat:([_searcher scannedFileCount] == 1 ? MSG_SEARCHED_FILES_ONE : MSG_SEARCHED_FILES_MULTIPLE),
+					[formatter stringFromNumber:@([_searcher scannedFileCount])],
+					[_searcher searchDuration]
 				];
 	}
 
@@ -927,9 +914,9 @@ Any other string:
 
 - (NSInteger)outlineView:(NSOutlineView*)outlineView numberOfChildrenOfItem:(id)item
 {
-	if(searcher.hasPerformedReplacement)
-			return item ? 1 : [[searcher allDocumentsWithSelectedMatches] count];
-	else	return [(item ? [searcher allMatchesForDocumentIdentifier:[item identifier]] : [searcher allDocumentsWithMatches]) count];
+	if(_searcher.hasPerformedReplacement)
+			return item ? 1 : [[_searcher allDocumentsWithSelectedMatches] count];
+	else	return [(item ? [_searcher allMatchesForDocumentIdentifier:[item identifier]] : [_searcher allDocumentsWithMatches]) count];
 }
 
 - (BOOL)outlineView:(NSOutlineView*)outlineView isItemExpandable:(id)item
@@ -940,11 +927,11 @@ Any other string:
 - (id)outlineView:(NSOutlineView*)outlineView child:(NSInteger)childIndex ofItem:(id)item
 {
 	if(item)
-		return [[searcher allMatchesForDocumentIdentifier:[item identifier]] objectAtIndex:childIndex];
-	else if(searcher.hasPerformedReplacement)
-		return [[searcher allDocumentsWithSelectedMatches] objectAtIndex:childIndex];
+		return [[_searcher allMatchesForDocumentIdentifier:[item identifier]] objectAtIndex:childIndex];
+	else if(_searcher.hasPerformedReplacement)
+		return [[_searcher allDocumentsWithSelectedMatches] objectAtIndex:childIndex];
 	else
-		return [[searcher allDocumentsWithMatches] objectAtIndex:childIndex];
+		return [[_searcher allDocumentsWithMatches] objectAtIndex:childIndex];
 }
 
 - (id)outlineView:(NSOutlineView*)outlineView objectValueForTableColumn:(NSTableColumn*)tableColumn byItem:(id)item
@@ -959,9 +946,9 @@ Any other string:
 	}
 	else if([[tableColumn identifier] isEqualToString:@"match"])
 	{
-		if(searcher.hasPerformedReplacement)
+		if(_searcher.hasPerformedReplacement)
 		{
-			NSUInteger count = [[searcher allSelectedMatchesForDocumentIdentifier:[item identifier]] count];
+			NSUInteger count = [[_searcher allSelectedMatchesForDocumentIdentifier:[item identifier]] count];
 			return [NSString stringWithFormat:@"%lu occurence%s replaced.", count, count == 1 ? "" : "s"];
 		}
 		else if([(FFMatch*)item match].binary)
@@ -1014,13 +1001,13 @@ Any other string:
 	if(OakIsAlternateKeyOrMouseEvent())
 	{
 		// Toggle all flags for the file
-		for(FFMatch* match in [searcher allMatchesForDocumentIdentifier:[item identifier]])
-			[searcher setSkipReplacement:![objectValue boolValue] forMatch:match];
+		for(FFMatch* match in [_searcher allMatchesForDocumentIdentifier:[item identifier]])
+			[_searcher setSkipReplacement:![objectValue boolValue] forMatch:match];
 		[outlineView reloadData];
 	}
 	else
 	{
-		[searcher setSkipReplacement:![objectValue boolValue] forMatch:item];
+		[_searcher setSkipReplacement:![objectValue boolValue] forMatch:item];
 	}
 }
 
@@ -1034,7 +1021,7 @@ Any other string:
 			pathCell.icon = [item icon];
 			pathCell.path = [item path] ?: [NSString stringWithCxxString:[(FFMatch*)item match].document->display_name()];
 			pathCell.base = [self rootPath];
-			pathCell.count = [outlineView isItemExpanded:item] ? 0 : [[searcher allMatchesForDocumentIdentifier:[item identifier]] count];
+			pathCell.count = [outlineView isItemExpanded:item] ? 0 : [[_searcher allMatchesForDocumentIdentifier:[item identifier]] count];
 		}
 	}
 	else if([[tableColumn identifier] isEqualToString:@"match"] && [cell isHighlighted])
@@ -1042,7 +1029,7 @@ Any other string:
 		id obj = [cell objectValue];
 		if([obj isKindOfClass:[NSAttributedString class]])
 		{
-			NSMutableAttributedString* str = [[obj mutableCopy] autorelease];
+			NSMutableAttributedString* str = [obj mutableCopy];
 			[str addAttribute:NSForegroundColorAttributeName value:[NSColor selectedTextColor] range:NSMakeRange(0, [str length])];
 			[cell setAttributedStringValue:str];
 		}
@@ -1062,7 +1049,7 @@ Any other string:
 	size_t lines = 1;
 
 	find::match_t const& m = [(FFMatch*)item match];
-	if(!m.binary && !searcher.hasPerformedReplacement)
+	if(!m.binary && !_searcher.hasPerformedReplacement)
 	{
 		size_t firstLine = m.range.from.line;
 		size_t lastLine = m.range.to.line;
@@ -1077,7 +1064,7 @@ Any other string:
 - (NSCell*)outlineView:(NSOutlineView*)outlineView dataCellForTableColumn:(NSTableColumn*)tableColumn item:(id)item
 {
 	if(tableColumn == nil && [self outlineView:outlineView isGroupItem:item])
-		return [[FFFilePathCell new] autorelease];
+		return [FFFilePathCell new];
 	return [tableColumn dataCell];
 }
 
@@ -1124,7 +1111,7 @@ Any other string:
 	{
 		NSUInteger selectionIndex = [[findAllResultsOutlineView selectedRowIndexes] firstIndex];
 		FFMatch* selectedMatch    = [findAllResultsOutlineView itemAtRow:selectionIndex];
-		document::show([selectedMatch match].document, searcher.projectIdentifier ? oak::uuid_t(to_s(searcher.projectIdentifier)) : document::kCollectionNew, [selectedMatch match].range, false);
+		document::show([selectedMatch match].document, _searcher.projectIdentifier ? oak::uuid_t(to_s(_searcher.projectIdentifier)) : document::kCollectionNew, [selectedMatch match].range, false);
 	}
 }
 

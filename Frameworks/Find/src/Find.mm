@@ -25,12 +25,10 @@ NSString* const FFFindWasTriggeredByEnter = @"FFFindWasTriggeredByEnter";
 NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 
 @implementation Find
-@synthesize projectIdentifier, documentIdentifier, windowController;
-@synthesize findOperation, findOptions;
 
 + (Find*)sharedInstance
 {
-	return SharedInstance ?: [[Find new] autorelease];
+	return SharedInstance ?: [Find new];
 }
 
 + (NSSet*)keyPathsForValuesAffectingFindFullWords        { return [NSSet setWithObject:@"findRegularExpression"]; }
@@ -40,12 +38,11 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 {
 	if(SharedInstance)
 	{
-		[self release];
 	}
-	else if(self = SharedInstance = [[super init] retain])
+	else if(self = SharedInstance = [super init])
 	{
 		D(DBF_Find_Base, bug("\n"););
-		self.windowController = [[FFWindowController new] autorelease];
+		self.windowController = [FFWindowController new];
 		[self.windowController setNextResponder:self];
 
 		self.windowController.projectFolder = NSHomeDirectory();
@@ -75,17 +72,16 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 {
 	if(controller != self.windowController)
 	{
-		if(windowController)
+		if(_windowController)
 		{
-			[windowController removeObserver:self forKeyPath:@"window"];
-			[windowController removeObserver:self forKeyPath:@"searchIn"];
-			[windowController release];
+			[_windowController removeObserver:self forKeyPath:@"window"];
+			[_windowController removeObserver:self forKeyPath:@"searchIn"];
 		}
-		if(windowController = [controller retain])
+		if(_windowController = controller)
 		{
 			self.windowController.delegate = self;
-			[windowController addObserver:self forKeyPath:@"window" options:0 context:NULL];
-			[windowController addObserver:self forKeyPath:@"searchIn" options:0 context:NULL];
+			[_windowController addObserver:self forKeyPath:@"window" options:0 context:NULL];
+			[_windowController addObserver:self forKeyPath:@"searchIn" options:0 context:NULL];
 		}
 	}
 }
@@ -102,7 +98,7 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 	// An autorelease pool is required here because the default pool will not be destroyed before termination,
 	// so objects cleaned up here would not be properly destroyed, and would report as leaking.
 	@autoreleasepool {
-		[windowController invalidate];
+		[_windowController invalidate];
 		self.windowController = nil;
 	}
 }
@@ -134,12 +130,12 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 
 - (IBAction)showFindPanel:(id)sender
 {
-	[windowController showWindow:self];
+	[_windowController showWindow:self];
 }
 
 - (IBAction)showFolderSelectionPanel:(id)sender
 {
-	[windowController showFolderSelectionPanel:sender];
+	[_windowController showFolderSelectionPanel:sender];
 }
 
 // ================
@@ -148,13 +144,13 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 
 - (void)conditionallyStoreFindSettingsOnPasteboard
 {
-	NSString* newString      = windowController.findString;
-	NSString* newReplacement = windowController.replaceString;
+	NSString* newString      = _windowController.findString;
+	NSString* newReplacement = _windowController.replaceString;
 
 	NSMutableDictionary* newOptions = [NSMutableDictionary dictionary];
-	if(windowController.findIgnoreWhitespace)  [newOptions setObject:@YES forKey:OakFindIgnoreWhitespaceOption];
-	if(windowController.findFullWords)         [newOptions setObject:@YES forKey:OakFindFullWordsOption];
-	if(windowController.findRegularExpression) [newOptions setObject:@YES forKey:OakFindRegularExpressionOption];
+	if(_windowController.findIgnoreWhitespace)  [newOptions setObject:@YES forKey:OakFindIgnoreWhitespaceOption];
+	if(_windowController.findFullWords)         [newOptions setObject:@YES forKey:OakFindFullWordsOption];
+	if(_windowController.findRegularExpression) [newOptions setObject:@YES forKey:OakFindRegularExpressionOption];
 
 	OakPasteboardEntry* oldEntry = [[OakPasteboard pasteboardWithName:NSFindPboard] current];
 	if(!oldEntry || ![oldEntry.string isEqualToString:newString])
@@ -216,14 +212,14 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 
 	[self conditionallyStoreFindSettingsOnPasteboard];
 
-	findOptions = (controller.findRegularExpression ? find::regular_expression : find::none) | (controller.findIgnoreWhitespace ? find::ignore_whitespace : find::none) | (controller.findFullWords ? find::full_words : find::none);
-	findOptions |= [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindIgnoreCase] ? find::ignore_case        : find::none;
-	findOptions |= [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindWrapAround] ? find::wrap_around        : find::none;
+	_findOptions = (controller.findRegularExpression ? find::regular_expression : find::none) | (controller.findIgnoreWhitespace ? find::ignore_whitespace : find::none) | (controller.findFullWords ? find::full_words : find::none);
+	_findOptions |= [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindIgnoreCase] ? find::ignore_case        : find::none;
+	_findOptions |= [[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindWrapAround] ? find::wrap_around        : find::none;
 
 	if(action == FindActionFindPrevious)
-		findOptions |= find::backwards;
+		_findOptions |= find::backwards;
 	else if(action == FindActionCountMatches || action == FindActionFindAll || action == FindActionReplaceAll)
-		findOptions |= find::all_matches;
+		_findOptions |= find::all_matches;
 
 	if(controller.isSearchingFolders || (self.documentIdentifier && action == FindActionFindAll) || action == FindActionReplaceSelected)
 	{
@@ -231,9 +227,9 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 		{
 			case FindActionFindAll:
 			{
-				FFDocumentSearch* folderSearch = [[FFDocumentSearch new] autorelease];
+				FFDocumentSearch* folderSearch = [FFDocumentSearch new];
 				folderSearch.searchString      = controller.findString;
-				folderSearch.options           = findOptions;
+				folderSearch.options           = _findOptions;
 				folderSearch.projectIdentifier = self.projectIdentifier;
 				if(self.documentIdentifier && [controller.searchIn isEqualToString:FFSearchInDocument])
 				{
@@ -285,7 +281,7 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 					++fileCount;
 				}
 				controller.searcher.hasPerformedReplacement = YES;
-				windowController.statusMessage = [NSString stringWithFormat:MSG_REPLACE_ALL_RESULTS, replaceCount, fileCount];
+				_windowController.statusMessage = [NSString stringWithFormat:MSG_REPLACE_ALL_RESULTS, replaceCount, fileCount];
 			}
 			break;
 
@@ -300,9 +296,9 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 		{
 			case FindActionFindNext:
 			case FindActionFindPrevious:
-			case FindActionFindAll:       findOperation = onlySelection ? kFindOperationFindInSelection    : kFindOperationFind;    break;
-			case FindActionCountMatches:  findOperation = onlySelection ? kFindOperationCountInSelection   : kFindOperationCount;   break;
-			case FindActionReplaceAll:    findOperation = onlySelection ? kFindOperationReplaceInSelection : kFindOperationReplace; break;
+			case FindActionFindAll:       _findOperation = onlySelection ? kFindOperationFindInSelection    : kFindOperationFind;    break;
+			case FindActionCountMatches:  _findOperation = onlySelection ? kFindOperationCountInSelection   : kFindOperationCount;   break;
+			case FindActionReplaceAll:    _findOperation = onlySelection ? kFindOperationReplaceInSelection : kFindOperationReplace; break;
 		}
 
 		closeWindowOnSuccess = action == FindActionFindNext && [[NSApp currentEvent] type] == NSKeyDown && to_s([NSApp currentEvent]) == utf8::to_s(NSCarriageReturnCharacter);
@@ -310,8 +306,8 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 	}
 }
 
-- (NSString*)findString    { return windowController.findString;    }
-- (NSString*)replaceString { return windowController.replaceString; }
+- (NSString*)findString    { return _windowController.findString;    }
+- (NSString*)replaceString { return _windowController.replaceString; }
 
 - (void)didFind:(NSUInteger)aNumber occurrencesOf:(NSString*)aFindString atPosition:(text::pos_t const&)aPosition
 {
@@ -325,10 +321,10 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 	variables["found"]  = to_s(aFindString);
 	variables["line"]   = aPosition ? text::format("%zu", aPosition.line + 1)   : NULL_STR;
 	variables["column"] = aPosition ? text::format("%zu", aPosition.column + 1) : NULL_STR;
-	windowController.statusMessage = [NSString stringWithCxxString:format_string::expand(formatStrings[(findOptions & find::regular_expression) ? 1 : 0][std::min<size_t>(aNumber, 2)], variables)];
+	_windowController.statusMessage = [NSString stringWithCxxString:format_string::expand(formatStrings[(_findOptions & find::regular_expression) ? 1 : 0][std::min<size_t>(aNumber, 2)], variables)];
 
 	if(closeWindowOnSuccess && aNumber != 0)
-		return [windowController close];
+		return [_windowController close];
 }
 
 - (void)didReplace:(NSUInteger)aNumber occurrencesOf:(NSString*)aFindString with:(NSString*)aReplacementString
@@ -337,8 +333,8 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 		{ @"Nothing replaced (no occurrences of “%@”).", @"Replaced one occurrence of “%@”.", @"Replaced %2$ld occurrences of “%@”." },
 		{ @"Nothing replaced (no matches for “%@”).",    @"Replaced one match of “%@”.",      @"Replaced %2$ld matches of “%@”."     }
 	};
-	NSString* format = formatStrings[(findOptions & find::regular_expression) ? 1 : 0][aNumber > 2 ? 2 : aNumber];
-	windowController.statusMessage = [NSString stringWithFormat:format, aFindString, aNumber];
+	NSString* format = formatStrings[(_findOptions & find::regular_expression) ? 1 : 0][aNumber > 2 ? 2 : aNumber];
+	_windowController.statusMessage = [NSString stringWithFormat:format, aFindString, aNumber];
 }
 
 - (IBAction)findNext:(id)sender     { [self performFindAction:FindActionFindNext     withWindowController:self.windowController]; }
@@ -356,15 +352,15 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 - (void)findClipboardDidChange:(NSNotification*)aNotification
 {
 	OakPasteboardEntry* entry              = [[OakPasteboard pasteboardWithName:NSFindPboard] current];
-	windowController.findString            = entry.string ?: @"";
-	windowController.findFullWords         = entry.fullWordMatch;
-	windowController.findIgnoreWhitespace  = entry.ignoreWhitespace;
-	windowController.findRegularExpression = entry.regularExpression;
+	_windowController.findString            = entry.string ?: @"";
+	_windowController.findFullWords         = entry.fullWordMatch;
+	_windowController.findIgnoreWhitespace  = entry.ignoreWhitespace;
+	_windowController.findRegularExpression = entry.regularExpression;
 }
 
 - (void)replaceClipboardDidChange:(NSNotification*)aNotification
 {
-	windowController.replaceString = [[[OakPasteboard pasteboardWithName:NSReplacePboard] current] string] ?: @"";
+	_windowController.replaceString = [[[OakPasteboard pasteboardWithName:NSReplacePboard] current] string] ?: @"";
 }
 
 // =============
@@ -373,31 +369,31 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 
 - (NSString*)projectFolder
 {
-	return windowController.projectFolder;
+	return _windowController.projectFolder;
 }
 
 - (void)setProjectFolder:(NSString*)folder
 {
-	windowController.projectFolder = folder;
+	_windowController.projectFolder = folder;
 }
 
 - (NSString*)searchFolder
 {
-	return windowController.searchFolder;
+	return _windowController.searchFolder;
 }
 
 - (void)setSearchFolder:(NSString*)folder
 {
-	windowController.searchIn = folder;
+	_windowController.searchIn = folder;
 }
 
 - (int)searchScope
 {
-	if([windowController.searchIn isEqualToString:FFSearchInSelection])
+	if([_windowController.searchIn isEqualToString:FFSearchInSelection])
 		return find::in::selection;
-	else if([windowController.searchIn isEqualToString:FFSearchInDocument])
+	else if([_windowController.searchIn isEqualToString:FFSearchInDocument])
 		return find::in::document;
-	else if([windowController.searchIn isEqualToString:FFSearchInOpenFiles])
+	else if([_windowController.searchIn isEqualToString:FFSearchInOpenFiles])
 		return find::in::open_files;
 	return find::in::folder;
 }
@@ -406,10 +402,10 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 {
 	switch(newSearchScope)
 	{
-		case find::in::selection:  windowController.searchIn = FFSearchInSelection;           break;
-		case find::in::document:   windowController.searchIn = FFSearchInDocument;            break;
-		case find::in::folder:     windowController.searchIn = windowController.searchFolder; break;
-		case find::in::open_files: windowController.searchIn = FFSearchInOpenFiles;           break;
+		case find::in::selection:  _windowController.searchIn = FFSearchInSelection;            break;
+		case find::in::document:   _windowController.searchIn = FFSearchInDocument;             break;
+		case find::in::folder:     _windowController.searchIn = _windowController.searchFolder; break;
+		case find::in::open_files: _windowController.searchIn = FFSearchInOpenFiles;            break;
 		default:
 			ASSERTF(false, "Unknown search scope tag %d\n", newSearchScope);
 	}
@@ -417,7 +413,7 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 
 - (BOOL)isVisible
 {
-	return windowController.window.isVisible;
+	return _windowController.window.isVisible;
 }
 
 // ===========
@@ -431,16 +427,16 @@ NSString* const FolderOptionsDefaultsKey  = @"Folder Search Options";
 	find::options_t option = find::options_t([sender tag]);
 	switch(option)
 	{
-		case find::ignore_whitespace:  windowController.findIgnoreWhitespace  = !windowController.findIgnoreWhitespace;  break;
+		case find::ignore_whitespace:  _windowController.findIgnoreWhitespace  = !_windowController.findIgnoreWhitespace;  break;
 		case find::ignore_case:        [[NSUserDefaults standardUserDefaults] setObject:([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindIgnoreCase] ? @NO : @YES) forKey:kUserDefaultsFindIgnoreCase]; break;
-		case find::full_words:         windowController.findFullWords         = !windowController.findFullWords;         break;
+		case find::full_words:         _windowController.findFullWords         = !_windowController.findFullWords;         break;
 		case find::wrap_around:        [[NSUserDefaults standardUserDefaults] setObject:([[NSUserDefaults standardUserDefaults] boolForKey:kUserDefaultsFindWrapAround] ? @NO : @YES) forKey:kUserDefaultsFindWrapAround]; break;
-		case find::regular_expression: windowController.findRegularExpression = !windowController.findRegularExpression; break;
+		case find::regular_expression: _windowController.findRegularExpression = !_windowController.findRegularExpression; break;
 		default:
 			ASSERTF(false, "Unknown find option tag %d\n", option);
 	}
 
-	if([[[[OakPasteboard pasteboardWithName:NSFindPboard] current] string] isEqualToString:windowController.findString])
+	if([[[[OakPasteboard pasteboardWithName:NSFindPboard] current] string] isEqualToString:_windowController.findString])
 		[self conditionallyStoreFindSettingsOnPasteboard]; // update the options on the pasteboard immediately if the find string has not been changed
 }
 @end

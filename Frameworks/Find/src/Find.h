@@ -9,16 +9,9 @@ namespace find
 
 PUBLIC @interface Find : NSResponder <OakFindServerProtocol>
 {
-	FFWindowController* windowController;
-
-	NSString* projectIdentifier;
-	NSString* documentIdentifier;
-
 	std::map<std::string, find::folder_scan_settings_t> folderSettings;
 
 	// OakFindProtocolServer
-	find_operation_t findOperation;
-	find::options_t  findOptions;
 	BOOL closeWindowOnSuccess;
 }
 @property (nonatomic, copy) NSString* projectFolder;

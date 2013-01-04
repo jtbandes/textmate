@@ -11,15 +11,13 @@
 // = Resizing =
 // ============
 
-@synthesize isExpanded, resizeAnimation;
-
 - (void)setIsExpanded:(BOOL)flag
 {
-	if(flag == isExpanded)
+	if(flag == _isExpanded)
 		return;
 
-	if(resizeAnimation && [resizeAnimation isAnimating])
-		[resizeAnimation stopAnimation];
+	if(_resizeAnimation && [_resizeAnimation isAnimating])
+		[_resizeAnimation stopAnimation];
 
 	NSRect targetWindowFrame = [self frame];
 
@@ -67,7 +65,7 @@
 		}
 	}
 
-	isExpanded = !isExpanded;
+	_isExpanded = !_isExpanded;
 
 	if([self isVisible])
 	{
@@ -75,9 +73,9 @@
 			self, NSViewAnimationTargetKey,
 			[NSValue valueWithRect:targetWindowFrame], NSViewAnimationEndFrameKey,
 			nil];
-		self.resizeAnimation = [[[NSViewAnimation alloc] initWithViewAnimations:@[ animation ]] autorelease];
-		[resizeAnimation setDuration:0.25];
-		[resizeAnimation startAnimation];
+		self.resizeAnimation = [[NSViewAnimation alloc] initWithViewAnimations:@[ animation ]];
+		[_resizeAnimation setDuration:0.25];
+		[_resizeAnimation startAnimation];
 	}
 	else
 	{
@@ -103,7 +101,6 @@
 - (void)dealloc
 {
 	[[NSNotificationCenter defaultCenter] removeObserver:self];
-	[super dealloc];
 }
 
 static NSString* const SavedWindowFrameName = @"Find Panel Saved Dimensions";

@@ -61,8 +61,8 @@ static NSMutableArray* folders_at_path (NSString* folder)
 			free(entries[--num]);
 		free(entries);
 	}
-	NSSortDescriptor* displayNameSort = [[[NSSortDescriptor alloc] initWithKey:@"stringByDeletingPathExtension" ascending:YES selector:@selector(displayNameCompare:)] autorelease];
-	NSSortDescriptor* extensionSort   = [[[NSSortDescriptor alloc] initWithKey:@"pathExtension" ascending:YES selector:@selector(displayNameCompare:)] autorelease];
+	NSSortDescriptor* displayNameSort = [[NSSortDescriptor alloc] initWithKey:@"stringByDeletingPathExtension" ascending:YES selector:@selector(displayNameCompare:)];
+	NSSortDescriptor* extensionSort   = [[NSSortDescriptor alloc] initWithKey:@"pathExtension" ascending:YES selector:@selector(displayNameCompare:)];
 	[res sortUsingDescriptors:@[ displayNameSort, extensionSort ]];
 	return res;
 }
@@ -88,7 +88,7 @@ static NSMutableArray* folders_at_path (NSString* folder)
 
 + (id)dataWithFolder:(NSString*)folder visitedFolders:(NSMutableSet*)visitedFolders owner:(id)owner;
 {
-	FFFolderMenuItemData* data = [[self new] autorelease];
+	FFFolderMenuItemData* data = [self new];
 	data.folder              = folder;
 	data.visitedFolders      = visitedFolders;
 	data.owner               = owner;
@@ -97,20 +97,12 @@ static NSMutableArray* folders_at_path (NSString* folder)
 
 - (id)dataByMovingIntoFolder:(NSString*)aFolder;
 {
-	FFFolderMenuItemData* data = [[[self class] new] autorelease];
+	FFFolderMenuItemData* data = [[self class] new];
 	data.folder              = aFolder;
-	data.visitedFolders      = [[visitedFolders mutableCopy] autorelease];
+	data.visitedFolders      = [visitedFolders mutableCopy];
 	[data.visitedFolders addObject:self.folder];
 	data.owner               = self.owner;
 	return data;
-}
-
-- (void)dealloc
-{
-	self.folder         = nil;
-	self.visitedFolders = nil;
-	self.owner          = nil;
-	[super dealloc];
 }
 @end
 
@@ -119,14 +111,15 @@ static FFFolderMenu* SharedInstance;
 
 + (FFFolderMenu*)sharedInstance
 {
-	return SharedInstance ?: [[FFFolderMenu new] autorelease];
+	return SharedInstance ?: [FFFolderMenu new];
 }
 
 - (id)init
 {
 	if(SharedInstance)
-			[self release];
-	else	self = SharedInstance = [[super init] retain];
+	{
+	}
+	else	self = SharedInstance = [super init];
 	return SharedInstance;
 }
 
@@ -143,7 +136,7 @@ static FFFolderMenu* SharedInstance;
 
 	[item setRepresentedObject:[FFFolderMenuItemData dataWithFolder:path visitedFolders:[NSMutableSet set] owner:owner]];
 
-	NSMenu* submenu = [[NSMenu new] autorelease];
+	NSMenu* submenu = [NSMenu new];
 	[submenu setAutoenablesItems:NO];
 	[submenu setDelegate:[FFFolderMenu sharedInstance]];
 	[item setSubmenu:submenu];
@@ -157,14 +150,14 @@ static FFFolderMenu* SharedInstance;
 
 - (NSMenuItem*)menuItemForPath:(NSString*)path parentData:(FFFolderMenuItemData*)data
 {
-	NSMenuItem* menuItem = [[[NSMenuItem alloc] initWithTitle:[[NSFileManager defaultManager] displayNameAtPath:path] action:@selector(selectFolder:) keyEquivalent:@""] autorelease];
+	NSMenuItem* menuItem = [[NSMenuItem alloc] initWithTitle:[[NSFileManager defaultManager] displayNameAtPath:path] action:@selector(selectFolder:) keyEquivalent:@""];
 	[menuItem setTarget:self];
 	[menuItem setRepresentedObject:[data dataByMovingIntoFolder:path]];
 	[menuItem setIconForFile:path];
 
 	if([[self class] hasFoldersAtPath:path])
 	{
-		NSMenu* submenu = [[NSMenu new] autorelease];
+		NSMenu* submenu = [NSMenu new];
 		[submenu setAutoenablesItems:NO];
 		[submenu setDelegate:[FFFolderMenu sharedInstance]];
 		[menuItem setSubmenu:submenu];
@@ -190,7 +183,7 @@ static FFFolderMenu* SharedInstance;
 			[aMenu insertItem:[NSMenuItem separatorItem] atIndex:1];
 			if([aMenu numberOfItems] == 2)
 			{
-				NSMenuItem* noSubfoldersItem = [[[NSMenuItem alloc] initWithTitle:@"No subfolders" action:NULL keyEquivalent:@""] autorelease];
+				NSMenuItem* noSubfoldersItem = [[NSMenuItem alloc] initWithTitle:@"No subfolders" action:NULL keyEquivalent:@""];
 				[noSubfoldersItem setEnabled:NO];
 				[aMenu insertItem:noSubfoldersItem atIndex:2];
 			}

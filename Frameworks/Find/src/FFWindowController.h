@@ -12,6 +12,8 @@ extern NSString* const FFSearchInOpenFiles;
 @interface FFWindowController : NSWindowController
 {
 	OBJC_WATCH_LEAKS(FFWindowController);
+	
+	NSAlert* currentSheet;
 
 	// The find/replace fields are bound through this controller so we can commitEditing
 	IBOutlet NSObjectController* findController;
@@ -27,47 +29,23 @@ extern NSString* const FFSearchInOpenFiles;
 
 	IBOutlet NSOutlineView* findAllResultsOutlineView;
 	IBOutlet OakStatusBar* findAllResultsHeaderView;
-	NSString* resultsHeaderText;
 	BOOL expandCollapseAllIsExpanding;
 	BOOL resultsHeaderEnabled;
-	BOOL enableReplacementSelectionCheckboxes;
 
 	IBOutlet NSTextField* statusTextField;
 
-	NSString* searchIn;
-	NSString* searchFolder;
-	NSString* projectFolder;
-
-	NSString* findString;
-	NSString* replaceString;
-
 	BOOL isBusy;
-	NSString* statusMessage;
 
 	OakHistoryList* recentFolders;
 
-	OakHistoryList* recentGlobs;
 	IBOutlet NSComboBox* globField;
 	IBOutlet NSTextField* globFieldLabel;
 	IBOutlet NSButton* wrapAroundField;
-
-	id delegate;
 
 	// ==============================
 	// = For the benefit of binding =
 	// ==============================
 	
-	BOOL canSetFileTypes;
-	BOOL canSetWrapAround;
-
-	BOOL findRegularExpression;
-	BOOL findFullWords;
-	BOOL findIgnoreWhitespace;
-
-	BOOL followLinks;
-	BOOL searchHiddenFolders;
-
-	FFDocumentSearch* searcher;
 	BOOL previewReplacements;
 }
 
