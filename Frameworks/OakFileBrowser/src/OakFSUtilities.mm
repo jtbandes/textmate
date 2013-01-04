@@ -10,23 +10,18 @@ NSURL* kURLLocationDesktop;
 NSURL* kURLLocationFavorites;
 NSURL* kURLLocationBundles;
 
-static dispatch_once_t onceToken;
-
-inline void initializeConstants()
+__attribute__((constructor))
+static void initializeConstants()
 {
-	dispatch_once(&onceToken, ^{
-		kURLLocationComputer  = [[NSURL alloc] initWithString:@"computer:///"];
-		kURLLocationHome      = [[NSURL alloc] initFileURLWithPath:NSHomeDirectory() isDirectory:YES];
-		kURLLocationDesktop   = [[NSURL alloc] initFileURLWithPath:[NSString stringWithCxxString:path::desktop()] isDirectory:YES];
-		kURLLocationFavorites = [[NSURL alloc] initFileURLWithPath:[NSString stringWithCxxString:oak::application_t::support("Favorites")] isDirectory:YES];
-		kURLLocationBundles   = [[NSURL alloc] initWithString:@"bundles:///"];
-	});
+	kURLLocationComputer  = [[NSURL alloc] initWithString:@"computer:///"];
+	kURLLocationHome      = [[NSURL alloc] initFileURLWithPath:NSHomeDirectory() isDirectory:YES];
+	kURLLocationDesktop   = [[NSURL alloc] initFileURLWithPath:[NSString stringWithCxxString:path::desktop()] isDirectory:YES];
+	kURLLocationFavorites = [[NSURL alloc] initFileURLWithPath:[NSString stringWithCxxString:oak::application_t::support("Favorites")] isDirectory:YES];
+	kURLLocationBundles   = [[NSURL alloc] initWithString:@"bundles:///"];
 }
 
 NSString* DisplayName (NSURL* url, size_t numberOfParents)
 {
-	initializeConstants();
-	
 	if([[url scheme] isEqualToString:[kURLLocationComputer scheme]])
 		return [(NSString*)SCDynamicStoreCopyComputerName(NULL, NULL) autorelease];
 	else if([[url scheme] isEqualToString:[kURLLocationBundles scheme]])
@@ -37,8 +32,6 @@ NSString* DisplayName (NSURL* url, size_t numberOfParents)
 
 NSImage* IconImage (NSURL* url, NSSize size)
 {
-	initializeConstants();
-	
 	NSImage* iconImage = nil;
 	if([[url scheme] isEqualToString:[kURLLocationComputer scheme]])
 		iconImage = [NSImage imageNamed:NSImageNameComputer];
@@ -55,8 +48,6 @@ NSImage* IconImage (NSURL* url, NSSize size)
 
 NSURL* ParentForURL (NSURL* url)
 {
-	initializeConstants();
-	
 	struct statfs buf;
 	NSString* currentPath = [url path];
 	NSString* parentPath  = [currentPath stringByDeletingLastPathComponent];
