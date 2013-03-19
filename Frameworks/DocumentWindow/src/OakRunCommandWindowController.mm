@@ -2,6 +2,7 @@
 #import <OakFoundation/OakHistoryList.h>
 #import <OakFoundation/OakFoundation.h>
 #import <OakAppKit/OakUIConstructionFunctions.h>
+#import <OakTextView/OakTextView.h>
 
 @interface OakRunCommandWindowController () <NSWindowDelegate>
 @property (nonatomic) NSTextField*         commandLabel;
@@ -20,6 +21,10 @@
 #endif
 
 @implementation OakRunCommandWindowController
+{
+	NSDictionary* _outputOptions;
+}
+
 + (OakRunCommandWindowController*)sharedInstance
 {
 	static OakRunCommandWindowController* instance = [OakRunCommandWindowController new];
@@ -38,9 +43,17 @@
 		self.resultPopUpButton    = OakCreatePopUpButton();
 		self.executeButton        = OakCreateButton(@"Execute");
 		self.cancelButton         = OakCreateButton(@"Cancel");
+		
+		_outputOptions = @{
+			@(output::replace_input) : @"Replace Input",
+			@(output::after_input)   : @"Insert After Input",
+		};
 
-		for(NSString* title in @[ @"Replace Input", @"Insert After Input" ])
-			[self.resultPopUpButton addItemWithTitle:title];
+		for(NSNumber* type in _outputOptions)
+			[self.resultPopUpButton addItemWithTitle:_outputOptions[type]];
+
+		[self.resultLabel  setAlignment:NSRightTextAlignment];
+		[self.commandLabel setAlignment:NSRightTextAlignment];
 
 		self.executeButton.action = @selector(execute:);
 		self.cancelButton.action  = @selector(cancel:);
@@ -53,6 +66,9 @@
 
 		[self.commandComboBox bind:NSValueBinding         toObject:_objectController withKeyPath:@"content.commandHistoryList.head" options:nil];
 		[self.commandComboBox bind:NSContentValuesBinding toObject:_objectController withKeyPath:@"content.commandHistoryList.list" options:nil];
+
+		[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(commandChanged:) name:NSControlTextDidChangeNotification object:self.commandComboBox];
+		[self commandChanged:nil];
 
 		NSDictionary* views = @{
 			@"commandLabel" : self.commandLabel,
@@ -70,8 +86,8 @@
 			[contentView addSubview:view];
 		}
 
-		CONSTRAINT(@"H:|-(>=20,==20@75)-[commandLabel]-[command(>=250)]-|", NSLayoutFormatAlignAllBaseline);
-		CONSTRAINT(@"H:|-(>=20,==20@75)-[resultLabel]-[result]-(>=20)-|", NSLayoutFormatAlignAllBaseline);
+		CONSTRAINT(@"H:|-[commandLabel]-[command(>=250)]-|", NSLayoutFormatAlignAllBaseline);
+		CONSTRAINT(@"H:|-[resultLabel(==commandLabel)]-[result]-(>=20)-|", NSLayoutFormatAlignAllBaseline);
 		CONSTRAINT(@"H:|-(>=20)-[cancel]-[execute]-|", NSLayoutFormatAlignAllBaseline);
 		CONSTRAINT(@"V:|-[command]-[result]", NSLayoutFormatAlignAllLeft);
 		CONSTRAINT(@"V:[result]-[execute]-|", 0);
@@ -88,16 +104,22 @@
 	return self;
 }
 
+- (void)commandChanged:(NSNotification*)notification
+{
+	self.executeButton.enabled = NSNotEmptyString(self.commandComboBox.stringValue);
+}
+
 - (IBAction)execute:(id)sender
 {
-	NSLog(@"%s", sel_getName(_cmd));
+	if(![self.objectController commitEditing])
+		return;
 
-	if([self.objectController commitEditing])
-	{
-		NSString* command = self.commandComboBox.stringValue;
-		if(NSNotEmptyString(command))
-			NSLog(@"%s run ‘%@’", sel_getName(_cmd), command);
-	}
+	NSString* command = self.commandComboBox.stringValue;
+	output::type outputType = (output::type)[self.resultPopUpButton indexOfSelectedItem];
+
+	if(id textView = [NSApp targetForAction:@selector(filterDocumentThroughCommand:replacingDocument:)])
+		[textView filterDocumentThroughCommand:command replacingDocument:(outputType == output::replace_input)];
+
 	[self close];
 }
 

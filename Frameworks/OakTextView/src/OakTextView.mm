@@ -29,6 +29,13 @@
 #import <text/utf16.h>
 #import <text/utf8.h>
 #import <oak/debug.h>
+#import <oak/datatypes.h>
+#import <oak/compat.h>
+#import <editor/write.h>
+
+#ifndef OAK_CHECK
+#define OAK_CHECK(expr) do { if((expr) != 0) { perror(#expr); return NO; } } while(false)
+#endif
 
 OAK_DEBUG_VAR(OakTextView_TextInput);
 OAK_DEBUG_VAR(OakTextView_Accessibility);
@@ -2272,6 +2279,78 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 		return res = GVLineRecord();
 	auto record = layout->line_record_for(text::pos_t(aLine, aColumn));
 	return res = GVLineRecord(record.line, record.softline, record.top, record.bottom, record.baseline);
+}
+
+- (BOOL)filterDocumentThroughCommand:(NSString*)commandString replacingDocument:(BOOL)replace
+{
+	signal(SIGPIPE, SIG_IGN);
+
+	char const* const argv[] = { "/bin/sh", "-c", [commandString UTF8String], NULL };
+	oak::c_array env(oak::basic_environment());
+
+	int in[2], out[2];
+	posix_spawn_file_actions_t fileActions;
+	posix_spawnattr_t flags;
+	pid_t pid = -1;
+
+	short closeOnExecFlag = (oak::os_major() == 10 && oak::os_minor() == 7) ? 0 : POSIX_SPAWN_CLOEXEC_DEFAULT;
+
+	OAK_CHECK(pipe(&in[0]) );
+	OAK_CHECK(pipe(&out[0]));
+	OAK_CHECK(fcntl(in[1],  F_SETFD, FD_CLOEXEC));
+	OAK_CHECK(fcntl(out[0], F_SETFD, FD_CLOEXEC));
+	OAK_CHECK(posix_spawn_file_actions_init(&fileActions));
+	OAK_CHECK(posix_spawn_file_actions_adddup2(&fileActions, in[0], 0));
+	OAK_CHECK(posix_spawn_file_actions_adddup2(&fileActions, out[1], 1));
+	OAK_CHECK(posix_spawn_file_actions_adddup2(&fileActions, out[1], 2));
+	OAK_CHECK(posix_spawn_file_actions_addclose(&fileActions, in[0]));
+	OAK_CHECK(posix_spawn_file_actions_addclose(&fileActions, out[1]));
+	OAK_CHECK(posix_spawnattr_init(&flags));
+	OAK_CHECK(posix_spawnattr_setflags(&flags, POSIX_SPAWN_SETSIGDEF|closeOnExecFlag));
+
+	int rc = posix_spawn(&pid, "/bin/sh", &fileActions, &flags, (char* const*)argv, env);
+	if(rc != 0)
+		perror(text::format("posix_spawn(\"/bin/sh\")").c_str());
+
+	OAK_CHECK(posix_spawnattr_destroy(&flags));
+	OAK_CHECK(posix_spawn_file_actions_destroy(&fileActions));
+	OAK_CHECK(close(in[0]));
+	OAK_CHECK(close(out[1]));
+
+	if(rc != 0)
+	{
+		close(in[1]);
+		close(out[0]);
+		return NO;
+	}
+
+	bool inputWasSelection = false;
+	std::map<std::string, std::string> environment(oak::basic_environment());
+	ng::write_unit_to_fd(document->buffer(), editor->ranges().last(), document->buffer().indent().tab_size(), in[1], input::entire_document, input::entire_document, input_format::text, scope::selector_t(), environment, &inputWasSelection);
+
+	close(in[1]);
+
+	std::string outString;
+	ssize_t len;
+	char bytes[512];
+	while((len = read(out[0], bytes, sizeof(bytes))) > 0)
+		outString.insert(outString.end(), bytes, bytes + len);
+	close(out[0]);
+	NSLog(@"Got result: %s", outString.c_str());
+
+	int status = 0;
+	if(waitpid(pid, &status, 0) == pid && WIFEXITED(status))
+	{
+		editor->handle_result(outString, replace ? output::replace_document : output::after_input, output_format::text, output_caret::after_output, text::pos_t(0, 0), environment);
+		return YES;
+	}
+	else
+	{
+		NSLog(@"Abnormal exit from command (%d).", status);
+		return NO;
+	}
+
+	return YES;
 }
 
 // ===================
