@@ -2326,7 +2326,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 
 	bool inputWasSelection = false;
 	std::map<std::string, std::string> environment(oak::basic_environment());
-	ng::write_unit_to_fd(document->buffer(), editor->ranges().last(), document->buffer().indent().tab_size(), in[1], input::entire_document, input::entire_document, input_format::text, scope::selector_t(), environment, &inputWasSelection);
+	text::range_t inputRange = ng::write_unit_to_fd(document->buffer(), editor->ranges().last(), document->buffer().indent().tab_size(), in[1], input::entire_document, input::entire_document, input_format::text, scope::selector_t(), environment, &inputWasSelection);
 
 	close(in[1]);
 
@@ -2341,7 +2341,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	int status = 0;
 	if(waitpid(pid, &status, 0) == pid && WIFEXITED(status))
 	{
-		editor->handle_result(outString, replace ? output::replace_document : output::after_input, output_format::text, output_caret::after_output, text::pos_t(0, 0), environment);
+		editor->handle_result(outString, replace ? output::replace_document : output::after_input, output_format::text, output_caret::after_output, inputRange, environment);
 		return YES;
 	}
 	else
