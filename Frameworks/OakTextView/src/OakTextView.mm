@@ -2340,6 +2340,7 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	int status = 0;
 	if(waitpid(pid, &status, 0) == pid && WIFEXITED(status))
 	{
+		AUTO_REFRESH;
 		editor->handle_result(outString, replace ? output::replace_document : output::after_input, output_format::text, output_caret::after_output, inputRange, environment);
 		return YES;
 	}
