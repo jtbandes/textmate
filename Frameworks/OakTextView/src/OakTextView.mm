@@ -2336,7 +2336,6 @@ static char const* kOakMenuItemTitle = "OakMenuItemTitle";
 	while((len = read(out[0], bytes, sizeof(bytes))) > 0)
 		outString.insert(outString.end(), bytes, bytes + len);
 	close(out[0]);
-	NSLog(@"Got result: %s", outString.c_str());
 
 	int status = 0;
 	if(waitpid(pid, &status, 0) == pid && WIFEXITED(status))
