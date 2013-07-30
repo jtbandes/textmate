@@ -11,6 +11,7 @@
 require 'getoptlong'
 require 'rdoc/usage'
 require 'shellwords'
+require 'erb'
 
 opts = GetoptLong.new(
   [ '--variables', '-v', GetoptLong::REQUIRED_ARGUMENT ],
@@ -44,6 +45,8 @@ opts.each do |opt, arg|
   end
 end
 
+output = String.new
+
 while gets
   $_.gsub!(/\$\{(.*?)\}/) do
     if variables.include?($1)
@@ -54,5 +57,7 @@ while gets
       abort "*** unknown variable: ‘#$1’"
     end
   end
-  print $_
+  output << $_
 end
+
+ERB.new(output, 0, '%-<>').run
