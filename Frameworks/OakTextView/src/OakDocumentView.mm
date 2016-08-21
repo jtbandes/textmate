@@ -101,6 +101,7 @@ private:
 		_textView.autoresizingMask = NSViewWidthSizable|NSViewHeightSizable;
 
 		textScrollView = [[NSScrollView alloc] initWithFrame:NSZeroRect];
+		textScrollView.drawsBackground       = NO;
 		textScrollView.hasVerticalScroller   = YES;
 		textScrollView.hasHorizontalScroller = YES;
 		textScrollView.autohidesScrollers    = YES;
@@ -384,14 +385,19 @@ private:
 	}
 }
 
+- (NSColor *)documentBackgroundColor
+{
+	theme_ptr theme = _textView.theme;
+	if(theme && cppDocument)
+		return [NSColor colorWithCGColor:theme->background(cppDocument->file_type())];
+	return nil;
+}
+
 - (void)updateStyle
 {
 	theme_ptr theme = _textView.theme;
 	if(theme && cppDocument)
 	{
-		[[self window] setOpaque:!theme->is_transparent() && !theme->gutter_styles().is_transparent()];
-		[textScrollView setBackgroundColor:[NSColor colorWithCGColor:theme->background(to_s(cppDocument->document().fileType))]];
-
 		if(theme->is_dark())
 		{
 			NSImage* whiteIBeamImage = [NSImage imageNamed:@"IBeam white" inSameBundleAsClass:[self class]];
@@ -423,6 +429,8 @@ private:
 		gutterDividerView.activeBackgroundColor = [NSColor colorWithCGColor:styles.divider];
 
 		[gutterView setNeedsDisplay:YES];
+		
+		[self.delegate documentViewDidUpdateStyle:self];
 	}
 }
 

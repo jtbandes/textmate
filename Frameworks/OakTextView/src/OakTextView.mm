@@ -380,7 +380,7 @@ struct document_view_t : ng::buffer_api_t
 	bool draw_wrap_column () const { return _layout->draw_wrap_column(); }
 	bool draw_indent_guides () const { return _layout->draw_indent_guides(); }
 	void update_metrics (CGRect visibleRect) { _layout->update_metrics(visibleRect); }
-	void draw (ng::context_t const& context, CGRect rectangle, bool isFlipped, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t(), bool drawBackground = true) { _layout->draw(context, rectangle, isFlipped, selection, highlightRanges, drawBackground); }
+	void draw (ng::context_t const& context, CGRect rectangle, bool isFlipped, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t(), bool drawScopeBackground = true) { _layout->draw(context, rectangle, isFlipped, selection, highlightRanges, drawScopeBackground); }
 	ng::index_t index_at_point (CGPoint point) const { return _layout->index_at_point(point); }
 	CGRect rect_at_index (ng::index_t const& index, bool bol_as_eol = false, bool wantsBaseline = false) const { return _layout->rect_at_index(index, bol_as_eol, wantsBaseline); }
 	CGRect rect_for_range (size_t first, size_t last, bool bol_as_eol = false) const { return _layout->rect_for_range(first, last, bol_as_eol); }
@@ -1065,14 +1065,10 @@ doScroll:
 // = Generic view stuff =
 // ======================
 
-+ (BOOL)isCompatibleWithResponsiveScrolling
-{
-	return NO;
-}
-
-- (BOOL)acceptsFirstResponder       { return YES; }
-- (BOOL)isFlipped                   { return YES; }
-- (BOOL)isOpaque                    { return YES; }
+- (BOOL)acceptsFirstResponder               { return YES; }
+- (BOOL)isFlipped                           { return YES; }
+- (BOOL)isOpaque                            { return NO; } // OakTextView does not draw its background.
++ (BOOL)isCompatibleWithResponsiveScrolling { return YES; }
 
 - (void)redisplayFrom:(size_t)from to:(size_t)to
 {
@@ -1090,10 +1086,7 @@ doScroll:
 	}
 
 	if(self.theme->is_transparent())
-	{
-		[[NSColor clearColor] set];
-		NSRectFill(aRect);
-	}
+		NSRectFillUsingOperation(aRect, NSCompositeClear);
 
 	CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
 	if(!self.antiAlias)

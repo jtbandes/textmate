@@ -810,15 +810,13 @@ namespace ng
 
 	}
 
-	void layout_t::draw (ng::context_t const& context, CGRect visibleRect, bool isFlipped, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges, bool drawBackground)
+	void layout_t::draw (ng::context_t const& context, CGRect visibleRect, bool isFlipped, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges, bool drawScopeBackground)
 	{
 		update_metrics(visibleRect);
 
 		CGContextSetTextMatrix(context, CGAffineTransformMake(1, 0, 0, 1, 0, 0));
 
 		CGColorRef background = _theme->background(scope::to_s(_buffer.scope(0).left));
-		if(drawBackground)
-			render::fill_rect(context, background, visibleRect);
 
 		CGFloat const yMin = CGRectGetMinY(visibleRect) - _margin.top;
 		CGFloat const yMax = CGRectGetMaxY(visibleRect) - _margin.top;
@@ -827,7 +825,7 @@ namespace ng
 		if(firstY != _rows.begin())
 			--firstY;
 
-		if(drawBackground)
+		if(drawScopeBackground)
 		{
 			foreach(row, firstY, _rows.lower_bound(yMax, &row_y_comp))
 				row->value.draw_background(_theme, *_metrics, context, isFlipped, visibleRect, background, _buffer, row->offset._length, CGPointMake(_margin.left, _margin.top + row->offset._height));

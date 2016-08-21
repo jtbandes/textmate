@@ -32,6 +32,7 @@
 #import <text/utf8.h>
 #import <settings/settings.h>
 #import <ns/ns.h>
+#import <cf/cgrect.h>
 #import <kvdb/kvdb.h>
 
 static NSString* const kUserDefaultsAlwaysFindInDocument = @"alwaysFindInDocument";
@@ -60,6 +61,48 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 	});
 }
 
+@interface OakWindowBackgroundView : NSView
+@end
+
+@implementation OakWindowBackgroundView
+{
+	ProjectLayoutView* _layoutView;
+}
+- (id)initWithLayoutView:(ProjectLayoutView *)layoutView
+{
+	if((self = [super init]))
+	{
+		_layoutView = layoutView;
+	}
+	return self;
+}
+
+- (void)documentViewDidUpdateStyle
+{
+	[self setNeedsDisplayInRect:[self convertRect:_layoutView.documentView.frame fromView:_layoutView]];
+}
+
+- (void)drawRect:(NSRect)dirtyRect
+{
+	NSRect documentRect = [self convertRect:_layoutView.documentView.frame fromView:_layoutView];
+	documentRect = NSIntersectionRect(dirtyRect, documentRect);
+	
+	std::vector<CGRect> windowBackground;
+	windowBackground.reserve(3);
+	OakRectDifference(dirtyRect, documentRect, std::back_inserter(windowBackground));
+	
+	[[NSColor windowBackgroundColor] set];
+	for(CGRect r : windowBackground)
+		NSRectFill(r);
+	
+	if (!NSIsEmptyRect(documentRect))
+	{
+		[_layoutView.documentView.documentBackgroundColor ?: [NSColor whiteColor] set];
+		NSRectFillUsingOperation(documentRect, NSCompositeCopy);
+	}
+}
+@end
+
 @interface QuickLookNSURLWrapper : NSObject <QLPreviewItem>
 @property (nonatomic) NSURL* url;
 @end
@@ -78,7 +121,7 @@ static void show_command_error (std::string const& message, oak::uuid_t const& u
 }
 @end
 
-@interface DocumentController () <NSWindowDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, OakFileBrowserDelegate, QLPreviewPanelDelegate, QLPreviewPanelDataSource>
+@interface DocumentController () <NSWindowDelegate, OakTabBarViewDelegate, OakTabBarViewDataSource, OakTextViewDelegate, OakDocumentViewDelegate, OakFileBrowserDelegate, QLPreviewPanelDelegate, QLPreviewPanelDataSource>
 @property (nonatomic) ProjectLayoutView*          layoutView;
 @property (nonatomic) OakTabBarView*              tabBarView;
 @property (nonatomic) OakDocumentView*            documentView;
@@ -242,6 +285,8 @@ namespace
 	scm::info_ptr                          _documentSCMInfo;
 	std::map<std::string, std::string>     _documentSCMVariables;
 	std::vector<std::string>               _documentScopeAttributes; // attr.os-version, attr.untitled / attr.rev-path + kSettingsScopeAttributesKey
+	
+	OakWindowBackgroundView* _windowBackgroundView;
 }
 
 + (KVDB*)sharedProjectStateDB
@@ -261,6 +306,7 @@ namespace
 		self.tabBarView.delegate   = self;
 
 		self.documentView = [[OakDocumentView alloc] init];
+		self.documentView.delegate = self;
 		self.textView = self.documentView.textView;
 		self.textView.delegate = self;
 
@@ -268,8 +314,12 @@ namespace
 		self.layoutView.tabBarView   = self.tabBarView;
 		self.layoutView.documentView = self.documentView;
 
+		_windowBackgroundView = [[OakWindowBackgroundView alloc] initWithLayoutView:self.layoutView];
+		
 		NSUInteger windowStyle = (NSTitledWindowMask|NSClosableWindowMask|NSResizableWindowMask|NSMiniaturizableWindowMask|NSTexturedBackgroundWindowMask);
 		self.window = [[NSWindow alloc] initWithContentRect:[NSWindow contentRectForFrameRect:[self frameRectForNewWindow] styleMask:windowStyle] styleMask:windowStyle backing:NSBackingStoreBuffered defer:NO];
+		self.window.opaque             = NO;
+		self.window.contentView        = _windowBackgroundView;
 		self.window.collectionBehavior = NSWindowCollectionBehaviorFullScreenPrimary;
 		self.window.delegate           = self;
 		self.window.releasedWhenClosed = NO;
@@ -1603,6 +1653,15 @@ namespace
 {
 	if(NSString* path = [aMenuItem respondsToSelector:@selector(representedObject)] ? [aMenuItem representedObject] : nil)
 		self.projectPath = self.defaultProjectPath = path;
+}
+
+// ============================
+// = OakDocumentView Delegate =
+// ============================
+
+- (void)documentViewDidUpdateStyle:(OakDocumentView*)sender
+{
+	[_windowBackgroundView documentViewDidUpdateStyle];
 }
 
 // ========================

@@ -68,7 +68,7 @@ namespace ng
 		// ======================
 
 		void update_metrics (CGRect visibleRect);
-		void draw (ng::context_t const& context, CGRect rectangle, bool isFlipped, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t(), bool drawBackground = true);
+		void draw (ng::context_t const& context, CGRect rectangle, bool isFlipped, ng::ranges_t const& selection, ng::ranges_t const& highlightRanges = ng::ranges_t(), bool drawScopeBackground = true);
 		ng::index_t index_at_point (CGPoint point) const;
 		CGRect rect_at_index (ng::index_t const& index, bool bol_as_eol = false, bool wantsBaseline = false) const;
 		CGRect rect_for_range (size_t first, size_t last, bool bol_as_eol = false) const;
