@@ -22,9 +22,10 @@ static double const  kFadeFinishTime = 0.70;
 	OBJC_WATCH_LEAKS(OakPopOutView);
 	CALayer* imageLayer;
 	CAShapeLayer* shapeLayer;
+	CGVector parentViewOffset;
 }
 @property (nonatomic) NSImage* contentImage;
-- (id)initWithFrame:(NSRect)aRect popOutRect:(NSRect)popOutRect;
+- (id)initWithFrame:(NSRect)aRect popOutRect:(NSRect)popOutRect parentViewOffset:(CGVector)offset;
 - (void)startAnimation:(id)sender;
 @end
 
@@ -60,7 +61,10 @@ void OakShowPopOutAnimation (NSView* parentView, NSRect popOutRect, NSImage* anI
 	[window setOpaque:NO];
 	[[window contentView] setWantsLayer:YES];
 
-	OakPopOutView* aView = [[OakPopOutView alloc] initWithFrame:[window contentView].bounds popOutRect:popOutRect];
+	parentView = parentView.enclosingScrollView.contentView;
+	CGVector parentViewOffset = CGVectorMake(window.frame.origin.x + parentView.bounds.origin.x, window.frame.origin.y - parentView.bounds.origin.y);
+
+	OakPopOutView* aView = [[OakPopOutView alloc] initWithFrame:[window contentView].bounds popOutRect:popOutRect parentViewOffset:parentViewOffset];
 	[aView setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
 
 	[anImage lockFocus];
@@ -71,8 +75,8 @@ void OakShowPopOutAnimation (NSView* parentView, NSRect popOutRect, NSImage* anI
 	aView.contentImage = anImage;
 	[[window contentView] addSubview:aView];
 
-	if(NSScrollView* scrollView = parentView.enclosingScrollView)
-		[[NSNotificationCenter defaultCenter] addObserver:aView selector:@selector(parentViewBoundsDidChange:) name:NSViewBoundsDidChangeNotification object:scrollView.contentView];
+	if(parentView)
+		[[NSNotificationCenter defaultCenter] addObserver:aView selector:@selector(parentViewBoundsDidChange:) name:NSViewBoundsDidChangeNotification object:parentView];
 
 	[window setFrame:[window frameRectForContentRect:windowRect] display:YES];
 	[parentView.window addChildWindow:window ordered:NSWindowAbove];
@@ -83,7 +87,7 @@ void OakShowPopOutAnimation (NSView* parentView, NSRect popOutRect, NSImage* anI
 }
 
 @implementation OakPopOutView
-- (id)initWithFrame:(NSRect)aRect popOutRect:(NSRect)popOutRect
+- (id)initWithFrame:(NSRect)aRect popOutRect:(NSRect)popOutRect parentViewOffset:(CGVector)offset
 {
 	if(self = [super initWithFrame:aRect])
 	{
@@ -111,6 +115,8 @@ void OakShowPopOutAnimation (NSView* parentView, NSRect popOutRect, NSImage* anI
 
 		imageLayer = [CALayer layer];
 		[shapeLayer addSublayer:imageLayer];
+
+		parentViewOffset = offset;
 	}
 	return self;
 }
@@ -167,8 +173,19 @@ void OakShowPopOutAnimation (NSView* parentView, NSRect popOutRect, NSImage* anI
 
 - (void)parentViewBoundsDidChange:(NSNotification*)notification
 {
-	[shapeLayer removeAllAnimations]; // Releases the animation which holds a strong reference to its delegate (us)
-	[[self window] close];
+	NSView* parentView = notification.object;
+	NSPoint origin = self.window.frame.origin;
+	origin.x = -parentView.bounds.origin.x + parentViewOffset.dx;
+	origin.y = parentView.bounds.origin.y + parentViewOffset.dy;
+	[self.window setFrameOrigin:origin];
+	
+	NSRect visibleRect = [parentView.window convertRectToScreen:[parentView convertRect:parentView.visibleRect toView:nil]];
+	NSRect shapeRect = [self.window convertRectToScreen:[self convertRect:[self convertRectFromLayer:shapeLayer.frame] toView:nil]];
+	if(!NSContainsRect(visibleRect, shapeRect))
+	{
+		[shapeLayer removeAllAnimations]; // Releases the animation which holds a strong reference to its delegate (us)
+		[[self window] close];
+	}
 }
 
 - (void)dealloc
